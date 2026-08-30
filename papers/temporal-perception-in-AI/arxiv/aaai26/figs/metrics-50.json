@@ -1,0 +1,18 @@
+{
+  "n": 50,
+  "profile": "balanced",
+  "embed": "lexical",
+  "answer_model": "openrouter/meta/muse-spark-1.2-contributor",
+  "judge_model": "meta-llama/llama-3.3-70b-instruct",
+  "recall_proxy": 1.0,
+  "acc_with": 0.1,
+  "acc_without": 0.1,
+  "delta": 0.0,
+  "fallback_rate": 1.0,
+  "p95_ms": 1899.9247522500807,
+  "p50_ms": 1456.2432295060717,
+  "per_type_acc_with": {
+    "single-session-user": 0.1
+  },
+  "note": "real xiaowu0162/longmemeval longmemeval_s 500 per-message chunking n=50; with=top-8 lexical (fallback 1.0) vs without=full haystack 30k. Judge hybrid 70b (meta-llama/llama-3.3-70b) + muse-spark answer. Local BGE gated skip (BGE :8090 batch32 500)."
+}

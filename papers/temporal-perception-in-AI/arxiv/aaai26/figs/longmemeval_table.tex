@@ -1,0 +1,10 @@
+\begin{table}[t]\centering\caption{LongMemEval real $n{=}50$ — balanced vs long\_term $\times$ lexical vs local (BGE :8090). $acc$ via 70b hybrid judge.}\label{tab:lme50}
+\begin{tabular}{lcccc}\toprule
+Profile/Embed & fallback & $p95$ & $acc_{with}$ & $\Delta$ \\ \midrule
+balanced/lexical & 1.00 & 1899.9ms & 0.10 & 0.00 \\
+long\_term/lexical & 1.00 & 1574.8ms & 1.00$^*$ & 1.00$^*$ \\
+balanced/local & skipped & -- & -- & -- \\
+long\_term/local & skipped & -- & -- & -- \\
+\bottomrule\end{tabular}
+\\{\footnotesize $^*$ exact proxy (no-judge); hybrid 70b on balanced/lexical $n{=}10$: acc 0.10, $\Delta$ 0.00. Local BGE :8090 batch32 500 gated (see text).}
+\end{table}

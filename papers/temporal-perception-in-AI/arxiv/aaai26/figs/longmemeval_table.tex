@@ -1,10 +1,8 @@
-\begin{table}[t]\centering\caption{LongMemEval real $n{=}50$ — balanced vs long\_term $\times$ lexical vs local (BGE :8090). $acc$ via 70b hybrid judge.}\label{tab:lme50}
+\begin{table}[t]\centering\caption{LongMemEval real $n{=}50$ — archival (primary) vs lexical ablation. $acc$ via 70b hybrid judge (meta-llama/llama-3.3-70b-instruct). Local BGE :8090 (fix 512tok $\to$ 1200c BATCH8).}\label{tab:lme50}
 \begin{tabular}{lcccc}\toprule
 Profile/Embed & fallback & $p95$ & $acc_{with}$ & $\Delta$ \\ \midrule
-balanced/lexical & 1.00 & 1899.9ms & 0.10 & 0.00 \\
-long\_term/lexical & 1.00 & 1574.8ms & 1.00$^*$ & 1.00$^*$ \\
-balanced/local & skipped & -- & -- & -- \\
-long\_term/local & skipped & -- & -- & -- \\
+archival/local & 0.00 & 180s & 0.56 & 0.40 \\
+balanced/lexical & 1.00 & 1.9s & 0.10 & 0.00 \\
 \bottomrule\end{tabular}
-\\{\footnotesize $^*$ exact proxy (no-judge); hybrid 70b on balanced/lexical $n{=}10$: acc 0.10, $\Delta$ 0.00. Local BGE :8090 batch32 500 gated (see text).}
+\\{\footnotesize Archival/local $n{=}50$ hybrid: $0.56/0.16$ $\Delta$ $0.40$ (recall $1.0$, $47/50$ + $3/3$ offset47 merged; stalled at q47 OpenRouter timeout). Lexical ablation fallback $1.0$ shows decay mechanism; E7 $55/55/35/7$ isolates policy.}
 \end{table}

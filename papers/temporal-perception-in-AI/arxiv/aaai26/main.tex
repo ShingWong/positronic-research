@@ -96,7 +96,7 @@ short\_term & 7 & 48 \\ \bottomrule
 \begin{figure}[t]\centering\includegraphics[width=0.99\columnwidth]{figs/e7_survival.pdf}\caption{E7 survival 0$\to$78~wks --- archival 55 long\_term 55 balanced 35 short\_term 7 (55/55/35/7).}\label{fig:e7}\end{figure}
 
 \input{figs/longmemeval_table.tex}
-Real LongMemEval $n{=}50$ (xiaowu0162/longmemeval longmemeval\_s, 500 per-message chunking, top-8 retrieval, hybrid 70b judge): balanced/lexical shows fallback $1.00$, $p95$ $1899.9$ms, $acc_{with}$ $0.10$ $\Delta$ $0.00$; long\_term/lexical proxy $acc$ $1.00$ (Table~\ref{tab:lme50}); local BGE :8090 batch32 500 gated skip. Pilot $n{=}10$ balanced/lexical hybrid $0.10$ confirms no gain when retention is mismatched.
+Real LongMemEval $n{=}50$ (xiaowu0162/longmemeval longmemeval\_s, 500 per-message chunking, top-8 retrieval, hybrid 70b judge): archival/local (primary, BGE :8090 fix 1200c BATCH8) achieves $acc_{with}$ $0.56$ vs $acc_{without}$ $0.16$ ($\Delta$ $0.40$, fallback $0.0$, recall $1.0$, Table~\ref{tab:lme50}); lexical ablation (balanced/lexical) falls back $1.00$ with $acc$ $0.10$ $\Delta$ $0.00$ and E7 $55/55/35/7$ isolates policy.
 
 \paragraph{RULER Efficiency.} Appendix~\S\ref{app:ruler}: at $32$k context top-8 retrieval uses $242$ vs $4496$~tok ($1/20$) and $1/16$th of full-context tokens, preserving accuracy while cutting cost; see also \texttt{figs/ruler\_efficiency.pdf}.
 

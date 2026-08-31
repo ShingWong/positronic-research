@@ -71,7 +71,7 @@ def main():
             pass
 
     plt.figure(figsize=(3.3, 2.2))
-    for y, label in [(archival, "archival"), (long_term, "long\\_term"), (balanced, "balanced"), (short_term, "short\\_term")]:
+    for y, label in [(archival, "archival"), (long_term, "long_term"), (balanced, "balanced"), (short_term, "short_term")]:
         plt.plot(weeks, y, label=label)
     plt.xlabel("Weeks")
     plt.ylabel("Episodes alive")

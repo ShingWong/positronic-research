@@ -70,3 +70,33 @@ the task *single-step*.
 This framing is the paper's core image and the pitch's opening line. It is a
 *scientific* claim — the measured delta (3D 0.14 → 4D 0.891) is the evidence —
 not just an analogy.
+
+## Indexes label the haystack; we X-ray through it
+
+A conventional index (FTS, keyword, inverted) is a **label on the haystack**:
+it tells you *which* straw holds the needle, but the haystack is still there —
+still in the context window, still obscuring. It compresses the *search time*,
+not the *search task*: the model must still find the needle and extract from
+within distraction. That is why the lexical ablation fails: a keyword index on
+the same corpus retrieves nothing usable on all 50 questions (fallback 1.00,
+acc 0.10) — faster navigation, same needle-in-haystack problem.
+
+Polytemporal access is **4D X-ray vision**: it does not locate the needle *in*
+the haystack — it collapses the haystack along the τ-axis so the needle is
+presented directly, in context, with the haystack perpendicular to the access
+path. The search task itself is eliminated; only extraction remains.
+
+- **Index** = metadata *about* the haystack.
+- **Engram** = a view of the corpus the haystack cannot occlude.
+- **Indexing** is a search technology; **polytemporal access** is an access
+  technology.
+
+## Division of labor: the cabinet and the working memory
+
+Exact bytes are the file cabinet's job; meaning is the engram's. The brain
+forgets bytes aggressively *because it never claimed them* — git, the database,
+and the filesystem preserve byte-perfect truth, and every consolidation
+*references* that truth (a pointer to commit `9ecab9a`) rather than duplicating
+it. Working memory keeps the distilled engram; the cabinet keeps the copy. Each
+layer does what it is best at — fidelity lives in the cabinet, meaning lives in
+the mind, and the two never need to be the same store.

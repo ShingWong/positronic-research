@@ -42,6 +42,17 @@ Every measurement in this study serves that goal. Nothing measures the memory
 system's quality; the memory system is the *controlled constant*. The models
 are the *variable*.
 
+## Design principle: the cabinet and the working memory
+
+Exact copies live in file cabinets and databases; working memory keeps meaning.
+Positronic is not a database replacement — git and the filesystem preserve
+byte-perfect truth, and the engram *references* that truth instead of
+duplicating it. The brain forgets bytes aggressively because it never claimed
+them; it preserves the distilled decision structure, and the cabinet preserves
+the copy. Fidelity is the cabinet's job; meaning is the engram's. The 4D-access
+claim depends on this division of labor: the engram can collapse the haystack
+because the byte-truth it points at is never lost.
+
 ## Success criteria
 
 - A per-model accuracy matrix on identical retrieval (the cookoff).

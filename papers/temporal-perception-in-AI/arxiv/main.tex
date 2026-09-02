@@ -151,6 +151,37 @@ The ablation localizes the mechanism. A lexical index over the same corpus does 
 
 \paragraph{Token reduction (real LongMemEval $n{=}50$).} The same retrieval reads a mean $1{,}569$~tok per question (top-8 stream-windowed snippets) vs.\ the $30$k-character baseline's $7{,}500$~tok -- a $4.8\times$ in-run reduction ($79\%$ fewer tokens). Against the full LongMemEval corpus ($\sim115$k~tok average), the true reduction is $\sim73\times$; the $30$k truncation is only a 32k-context accommodation for the baseline.
 
+\paragraph{Decay ablation (E1): $\tau$-keyed vs wall-clock-keyed decay.}
+The strongest confound test is not retrieval quality but the decay clock
+itself. We replay identical $55$-event streams through two engines that differ
+\textbf{only} in the clock driving the prune ladder (Eq.~decay):
+polytemporal $\tau$ (novelty-integrated) vs.\ wall-clock $t$
+(MemoryBank-style $R=e^{-t/S}$). On a uniform stream (control) the two clocks
+are calibrated to retain identically ($S_{\text{wall}}=340$~d at $n{=}55$);
+on a burst-quiet stream (all $55$ events in the first $2$ weeks, then $76$
+quiet weeks) they diverge completely (Table~\ref{tab:e1}).
+
+\begin{table}[t]\centering\caption{E1 decay ablation (E7's $n{=}55$, $78$~wks,
+balanced profile): identical streams, only the decay clock differs.}
+\label{tab:e1}
+\begin{tabular}{@{}llcc@{}}
+\toprule
+Stream & Metric & $\tau$-decay & Wall-decay \\
+\midrule
+uniform (control) & retention & 35/55 & 35/55 \\
+uniform (control) & retrieval & 1.00 & 1.00 \\
+burst-quiet (stress) & retention & \textbf{35/55} & \textbf{0/55} \\
+burst-quiet (stress) & retrieval & \textbf{1.00} & \textbf{0.00} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+After an eventful burst followed by equal wall duration of quiet, wall-clock
+decay purges the entire burst ($0/55$) while $\tau$-decay preserves it
+($35/55$, retrievable $1.0$): on equal wall time, \emph{wall forgets, $\tau$
+remembers}. This isolates the decay clock as the causal variable --- not the
+embedding, not the retrieval, not the answer model.
+
 \begin{figure}[t]\centering\includegraphics[width=0.99\columnwidth]{figs/ruler_efficiency.pdf}\caption{RULER NIAH efficiency ($4$--$32$k, synthetic, lexical): flat $242$~tok top-$8$ injection vs.\ growing full haystack; recall@1 $1.0$.}\label{fig:ruler}\end{figure}
 
 \subsection{Summary}

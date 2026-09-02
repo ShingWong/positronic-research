@@ -23,7 +23,7 @@ choice — on a fixed polytemporal substrate. The question PRISM answers is not
 
 That is the goal every measurement below serves.
 
-## What PRISM measures (the inverted design)
+## Measurement axes (on a fixed polytemporal substrate)
 
 | Component | Isolated how | What it shows |
 |---|---|---|
@@ -40,13 +40,18 @@ That is the goal every measurement below serves.
 2. **Extraction-miss** — gold present in context, model fails to copy it.
    *This is what PRISM measures.*
 3. **Empty-answer defect** — model returns nothing. A structural failure that
-   poisons any benchmark that doesn't check for it.
+   poisons any benchmark that doesn't check for it. Any benchmark that doesn't
+   explicitly detect and penalize empty answers is silently overstating model
+   reliability.
 
 ## The worked example
 
 Q17, "What did I buy for my sister's birthday gift?" — gold `a yellow dress`,
 present verbatim in the top-8 context. A model that fails this is not limited
 by retrieval; it is limited by extraction. PRISM records exactly that.
+
+PRISM tells labs which models are actually fit to sit on top of a perfect
+memory organ—and which will quietly waste it.
 
 ## Goal of this document set
 

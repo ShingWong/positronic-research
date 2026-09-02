@@ -1,19 +1,19 @@
 {
-  "n": 50,
-  "profile": "archival",
-  "embed": "local",
-  "answer_model": "openrouter/meta/muse-spark-1.2-contributor",
-  "judge_model": "meta-llama/llama-3.3-70b-instruct",
-  "recall_proxy": 1.0,
-  "acc_with": 0.58,
-  "acc_without": 0.14,
-  "delta": 0.43999999999999995,
-  "fallback_rate": 0.0,
-  "p95_ms": 209982.57271219918,
-  "p50_ms": 150687.21440149238,
-  "per_type_acc_with": {
-    "single-session-user": 0.58
-  },
-  "note": "real xiaowu0162/longmemeval longmemeval_s 500 per-message chunking; with=top-8 RRF local BGE snippets (~2k tok) vs without=full haystack 30k chars. Judge hybrid (exact fallback to LLM).",
-  "hardware": "ai-test VM KVM/QEMU kvm KVM/RedHat 2x Xeon E5-2698 v4 2.2GHz 70vCPU 64GiB+41GiB swap 2x AMD gfx906 32GiB ROCm HIP 1.1 llama-server 11221 beellama-check/build-hip bge-m3-Q8_0 606MiB :8090 c8192 BATCH8 1200c Qwen3.8-27B-HauhauCS-IQ4_XS 15G +FastMTP-32K 862M :8080 -t32 -c131072 draft-mtp cache-reuse512 ENGRAM_TAG v0.2.0"
+ "n": 50,
+ "profile": "archival",
+ "embed": "local",
+ "answer_model": "deepseek/deepseek-v4-flash-0731",
+ "judge_model": "meta-llama/llama-3.3-70b-instruct",
+ "recall_proxy": 1.0,
+ "acc_with": 0.9,
+ "acc_without": 0.12,
+ "delta": 0.78,
+ "fallback_rate": 0.0,
+ "p95_ms": 209982.57271219918,
+ "p50_ms": 150687.21440149238,
+ "per_type_acc_with": {
+  "single-session-user": 0.58
+ },
+ "note": "real xiaowu0162/longmemeval longmemeval_s 500 per-message chunking; with=top-8 stream-windowed RRF local BGE snippets vs without=full haystack 30k chars. Judge hybrid (exact fallback to LLM). Commodity answer model; retrieval placed gold in context 50/50; 5 misses are answer-model extraction failures (PRISM-isolated).",
+ "hardware": "ai-test VM KVM/QEMU kvm KVM/RedHat 2x Xeon E5-2698 v4 2.2GHz 70vCPU 64GiB+41GiB swap 2x AMD gfx906 32GiB ROCm HIP 1.1 llama-server 11221 beellama-check/build-hip bge-m3-Q8_0 606MiB :8090 c8192 BATCH8 1200c Qwen3.8-27B-HauhauCS-IQ4_XS 15G +FastMTP-32K 862M :8080 -t32 -c131072 draft-mtp cache-reuse512 ENGRAM_TAG v0.2.0"
 }

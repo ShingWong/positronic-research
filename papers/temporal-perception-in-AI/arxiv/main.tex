@@ -143,6 +143,16 @@ short\_term & 11 & 44 \\ \bottomrule
 \begin{figure}[t]\centering\includegraphics[width=0.99\columnwidth]{figs/e7_survival.pdf}\caption{E7 survival 0$\to$78~wks --- archival 55 long\_term 55 balanced 35 short\_term 11 (55/55/35/11).}\label{fig:e7}\end{figure}
 
 \input{figs/longmemeval_table.tex}
+
+\paragraph{PRISM.}
+Positronic PRISM (Polytemporal Retrieval with Isolated Scoring of Models) is
+the measurement methodology used throughout: retrieval is held fixed on a
+polytemporal substrate (gold-presence verified per question), and the
+answer-model's extraction quality is scored in isolation. The result is a
+decomposition of the headline accuracy into retrieval quality (which does not
+fail here) and model extraction quality (the measured variable), so each
+miss is attributed to its true cause.
+
 Real LongMemEval $n{=}50$ (xiaowu0162/longmemeval longmemeval\_s, $500$ per-message chunking, top-$8$ retrieval, hybrid $70$b judge) tests whether the index helps retrieval, not just retention. The archival/local configuration (BGE-M3 semantic embeddings at \texttt{:8090}, $1200$-character truncation, batch $8$) with a commodity answer model (DeepSeek-V4-Flash) and stream-windowed retrieval achieves $acc_{with}$ $0.90$ vs.\ $acc_{without}$ $0.12$ ($\Delta$ $0.78$), with fallback $0.0$ and recall $1.0$ (Table~\ref{tab:lme50}). The lexical ablation (balanced/lexical) falls back $1.00$ with $acc$ $0.10$ $\Delta$ $0.00$; E7 $55/55/35/11$ isolates the retention policy as the causal variable.
 
 The ablation localizes the mechanism. A lexical index over the same corpus does not recover accuracy: on the balanced/lexical configuration the index retrieves nothing usable on all $50$ questions (fallback $1.00$, $acc$ $0.10$). The limiting factor is not \emph{locating} candidate text but \emph{presenting the gold within a distraction-free window}: the polytemporal configuration placed the gold in context on all $50$ questions (recall $1.0$, fallback $0.0$), reducing the task from joint find-and-extract to extract-only --- the condition in which a commodity answer model reaches $acc$ $0.90$ vs.\ $0.12$. Retrieval quality is thus the causal variable: given the gold in context, accuracy is bounded by the answer model's extraction ($5$ of $50$ failures, all attributed to extraction rather than retrieval); given only a lexical index, no answer model could recover.

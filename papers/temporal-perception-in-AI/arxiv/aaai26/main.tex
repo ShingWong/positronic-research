@@ -112,6 +112,8 @@ Real LongMemEval $n{=}50$ (xiaowu0162/longmemeval longmemeval\_s, $500$ per-mess
 
 \paragraph{RULER Efficiency.} Appendix~\S\ref{app:ruler}: across $4$--$32$k contexts, top-$8$ retrieval uses a flat $242$~tok vs.\ a linearly growing full haystack ($2.2$--$18$k~tok), a $1/10$--$1/74$ reduction, preserving recall@1 $1.0$ (Fig.~\ref{fig:ruler}); see also \texttt{figs/ruler\_efficiency.pdf}.
 
+\paragraph{Token reduction (real LongMemEval $n{=}50$).} The same retrieval reads a mean $1{,}569$~tok per question (top-8 stream-windowed snippets) vs.\ the $30$k-character baseline's $7{,}500$~tok -- a $4.8\times$ in-run reduction ($79\%$ fewer tokens). Against the full LongMemEval corpus ($\sim115$k~tok average), the true reduction is $\sim73\times$; the $30$k truncation is only a 32k-context accommodation for the baseline.
+
 \begin{figure}[t]\centering\includegraphics[width=0.99\columnwidth]{figs/ruler_efficiency.pdf}\caption{RULER NIAH efficiency ($4$--$32$k, synthetic, lexical): flat $242$~tok top-$8$ injection vs.\ growing full haystack; recall@1 $1.0$.}\label{fig:ruler}\end{figure}
 
 \subsection{Summary}

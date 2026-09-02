@@ -1,0 +1,90 @@
+{
+  "16": {
+    "claude-opus-5": {
+      "ans": "A yellow dress and a matching pair of earrings.",
+      "hit": true
+    },
+    "gpt-5.6-luna-pro": {
+      "ans": "You bought your sister a yellow dress and a matching pair of earrings.",
+      "hit": true
+    },
+    "gemini-3.7-flash": {
+      "ans": "Based",
+      "hit": true
+    },
+    "glm-5.3": {
+      "ans": "A yellow dress and a pair of earrings to match.",
+      "hit": true
+    },
+    "deepseek-v4-pro-0813": {
+      "ans": "A yellow dress and a yellow dress and a pair of earrings to match. to ",
+      "hit": true
+    }
+  },
+  "18": {
+    "claude-opus-5": {
+      "ans": "You packed 7 shirts (though you only wore 3 of them).",
+      "hit": true
+    },
+    "gpt-5.6-luna-pro": {
+      "ans": "You packed **7 shirts**.",
+      "hit": true
+    },
+    "gemini-3.7-flash": {
+      "ans": "Based on",
+      "hit": false
+    },
+    "glm-5.3": {
+      "ans": "Based on the context, you packed **7 shirts** for your trip to Costa R",
+      "hit": true
+    },
+    "deepseek-v4-pro-0813": {
+      "ans": "[ERR empty content]",
+      "hit": false
+    }
+  },
+  "28": {
+    "claude-opus-5": {
+      "ans": "3:1 \u2014 three parts gin to one part vermouth, with a dash of citrus bitt",
+      "hit": true
+    },
+    "gpt-5.6-luna-pro": {
+      "ans": "Your preferred gin-to-vermouth ratio is **3:1**, with a dash of citrus",
+      "hit": true
+    },
+    "gemini-3.7-flash": {
+      "ans": "3:1",
+      "hit": true
+    },
+    "glm-5.3": {
+      "ans": "3:1 with a dash of citrus bitters.",
+      "hit": true
+    },
+    "deepseek-v4-pro-0813": {
+      "ans": "Your preferred gin-to-vermouth ratio for a classic martini is 3:1 with",
+      "hit": true
+    }
+  },
+  "29": {
+    "claude-opus-5": {
+      "ans": "You upgraded your laptop's RAM to 16GB.",
+      "hit": true
+    },
+    "gpt-5.6-luna-pro": {
+      "ans": "You upgraded your laptop to **16GB of RAM**.",
+      "hit": true
+    },
+    "gemini-3.7-flash": {
+      "ans": "Based on the",
+      "hit": false
+    },
+    "glm-5.3": {
+      "ans": "You upgraded your laptop's RAM to 16GB.",
+      "hit": true
+    },
+    "deepseek-v4-pro-0813": {
+      "ans": "16GB",
+      "hit": true
+    }
+  }
+}

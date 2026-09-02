@@ -1,0 +1,80 @@
+{
+  "16": {
+    "deepseek-v4-flash-0731": {
+      "ans": "Yellow dress and a pair of matching ear",
+      "hit": true
+    },
+    "deepseek-v4-pro-0813": {
+      "ans": "A yellow dress and a pair of",
+      "hit": true
+    },
+    "glm-5.3-flash": {
+      "ans": "You",
+      "hit": false
+    },
+    "qwen3.8-flash": {
+      "ans": "[ERR HTTP Error 429: Too Many Requests]",
+      "hit": true
+    },
+    "kimi-k3": {
+      "ans": "A yellow dress and a pair of earrings to match.",
+      "hit": true
+    },
+    "gemini-3.7-flash": {
+      "ans": "\"sister'",
+      "hit": false
+    }
+  },
+  "18": {
+    "deepseek-v4-flash-0731": {
+      "ans": "",
+      "hit": false
+    },
+    "deepseek-v4-pro-0813": {
+      "ans": "[ERR empty content]",
+      "hit": false
+    },
+    "glm-5.3-flash": {
+      "ans": "[ERR empty content]",
+      "hit": false
+    },
+    "qwen3.8-flash": {
+      "ans": "[ERR HTTP Error 429: Too Many Requests]",
+      "hit": false
+    },
+    "kimi-k3": {
+      "ans": "Based on the context, you packed **7 shirts** for your trip ",
+      "hit": true
+    },
+    "gemini-3.7-flash": {
+      "ans": "Based on the",
+      "hit": false
+    }
+  },
+  "28": {
+    "deepseek-v4-flash-0731": {
+      "ans": "[ERR empty content]",
+      "hit": false
+    },
+    "deepseek-v4-pro-0813": {
+      "ans": "[ERR empty content]",
+      "hit": false
+    },
+    "glm-5.3-flash": {
+      "ans": "[ERR empty content]",
+      "hit": false
+    },
+    "qwen3.8-flash": {
+      "ans": "[ERR HTTP Error 429: Too Many Requests]",
+      "hit": false
+    },
+    "kimi-k3": {
+      "ans": "[ERR empty content]",
+      "hit": false
+    },
+    "gemini-3.7-flash": {
+      "ans": "[ERR empty content]",
+      "hit": false
+    }
+  }
+}

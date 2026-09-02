@@ -2,6 +2,8 @@
 
 > **Status:** scaffold — results fill in as the `final-context1` n=50 run and the
 > model panel (cookoff) land. See `consumers/benchmarks` for the harness.
+> Cookoff results (frontier ceiling, flash-failures panel, opus-5 falsification)
+> are committed in `cookoff-results.md` + `results/`.
 
 **Positronic PRISM is not a benchmark of memory systems. It is a benchmark of
 models — measured against a memory system that does not fail.**
@@ -58,5 +60,6 @@ by retrieval; it is limited by extraction. PRISM records exactly that.
 See `00-objective.md` for the full thesis, `05-four-dimensional-access.md`
 for the core image (4D access to a 3D haystack), `10-methodology.md` for the
 protocol, `25-failure-autopsies.md` for the per-failure traces that prove
-each miss is a model limit not a memory failure, and `60-partnerships.md`
+each miss is a model limit not a memory failure, `cookoff-results.md` for the
+measured answer-model panel, and `60-partnerships.md`
 for the model-testing / funding offer.

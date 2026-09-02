@@ -1,0 +1,5 @@
+idx16: gold='a yellow dress' -> HIT  "You didn't say — you mentioned buying a gift for your sister"
+idx18: gold='7' -> MISS  "You haven't mentioned a trip to Costa Rica or any shirts you"
+idx28: gold='3:1' -> MISS  "You haven't mentioned that — there's nothing in our conversa"
+idx30: gold='The painting is worth triple what I paid for it.' -> HIT  "There's no mention of a sunset painting anywhere in our conv"
+idx42: gold='a lemon blueberry cake' -> HIT  "You haven't mentioned baking anything for your niece's birth"

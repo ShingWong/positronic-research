@@ -1,0 +1,25 @@
+=== Q16 gold='a yellow dress' q="What did I buy for my sister's birthday " ===
+  deepseek-v4-flash-0731 HIT  'Yellow dress and a pair of matching ear'
+  deepseek-v4-pro-0813   HIT  'A yellow dress and a pair of'
+  glm-5.3-flash          MISS  'You'
+  qwen3.8-flash          HIT  '[ERR HTTP Error 429: Too Many Requests]'
+  kimi-k3                HIT  'A yellow dress and a pair of earrings to match.'
+  gemini-3.7-flash       MISS  '"sister\''
+
+=== Q18 gold='7' q='How many shirts did I pack for my 5-day ' ===
+  deepseek-v4-flash-0731 MISS  ''
+  deepseek-v4-pro-0813   MISS  '[ERR empty content]'
+  glm-5.3-flash          MISS  '[ERR empty content]'
+  qwen3.8-flash          MISS  '[ERR HTTP Error 429: Too Many Requests]'
+  kimi-k3                HIT  'Based on the context, you packed **7 shirts** for '
+  gemini-3.7-flash       MISS  'Based on the'
+
+=== Q28 gold='3:1' q='What is my preferred gin-to-vermouth rat' ===
+  deepseek-v4-flash-0731 MISS  '[ERR empty content]'
+  deepseek-v4-pro-0813   MISS  '[ERR empty content]'
+  glm-5.3-flash          MISS  '[ERR empty content]'
+  qwen3.8-flash          MISS  '[ERR HTTP Error 429: Too Many Requests]'
+  kimi-k3                MISS  '[ERR empty content]'
+  gemini-3.7-flash       MISS  '[ERR empty content]'
+
+saved results/longmemeval/cookoff-failures.json

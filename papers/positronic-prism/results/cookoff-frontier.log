@@ -1,0 +1,29 @@
+=== Q16 gold='a yellow dress' ===
+  claude-opus-5          HIT  'A yellow dress and a matching pair of earrings.'
+  gpt-5.6-luna-pro       HIT  'You bought your sister a yellow dress and a matching pa'
+  gemini-3.7-flash       HIT  'Based'
+  glm-5.3                HIT  'A yellow dress and a pair of earrings to match.'
+  deepseek-v4-pro-0813   HIT  'A yellow dress and a yellow dress and a pair of earring'
+
+=== Q18 gold='7' ===
+  claude-opus-5          HIT  'You packed 7 shirts (though you only wore 3 of them).'
+  gpt-5.6-luna-pro       HIT  'You packed **7 shirts**.'
+  gemini-3.7-flash       MISS  'Based on'
+  glm-5.3                HIT  'Based on the context, you packed **7 shirts** for your '
+  deepseek-v4-pro-0813   MISS  '[ERR empty content]'
+
+=== Q28 gold='3:1' ===
+  claude-opus-5          HIT  '3:1 — three parts gin to one part vermouth, with a dash'
+  gpt-5.6-luna-pro       HIT  'Your preferred gin-to-vermouth ratio is **3:1**, with a'
+  gemini-3.7-flash       HIT  '3:1'
+  glm-5.3                HIT  '3:1 with a dash of citrus bitters.'
+  deepseek-v4-pro-0813   HIT  'Your preferred gin-to-vermouth ratio for a classic mart'
+
+=== Q29 gold='16GB' ===
+  claude-opus-5          HIT  "You upgraded your laptop's RAM to 16GB."
+  gpt-5.6-luna-pro       HIT  'You upgraded your laptop to **16GB of RAM**.'
+  gemini-3.7-flash       MISS  'Based on the'
+  glm-5.3                HIT  "You upgraded your laptop's RAM to 16GB."
+  deepseek-v4-pro-0813   HIT  '16GB'
+
+saved results/longmemeval/cookoff-frontier.json

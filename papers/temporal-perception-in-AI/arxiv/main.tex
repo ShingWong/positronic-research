@@ -73,6 +73,41 @@ Each disanalogy is a row of the form: humans do $X$ for biological reason $Y$; a
 
 \paragraph{D10 Precision as confidence (C7).} Humans store intervals $[t_{\text{lo}},t_{\text{hi}}]$ whose width equals encoding confidence; recall returns answers at stored resolution, never manufactured precision. The wallet lost ``between noon and sunset'' correctly reports an interval. $\to$ H9. Calibrated-confidence scoring predicts that reported interval widths track actual temporal error.
 
+\subsection{The Case--Disanalogy--Hypothesis Map}
+Table~\ref{tab:cdh} enumerates the full mapping from case vectors to
+disanalogies to falsifiable hypotheses to operational tests. The cases are
+specification test-vectors (C1--C8); the hypotheses are the falsifiable claims
+(H1--H18, H-$\tau$); each row's test is the experiment that would falsify it.
+
+\begin{table*}[t]\centering\small
+\caption{Case $\to$ Disanalogy $\to$ Hypothesis $\to$ Operational test.}
+\label{tab:cdh}
+\begin{tabular}{@{}p{0.8cm}p{2.4cm}p{5.2cm}p{5.2cm}@{}}
+\toprule
+C & Disanalogy (D) & Hypothesis (H) & Operational test \\
+\midrule
+C1 & D1 texture-vs-timestamp; D2 salience-gated durability & H1, H2 &
+    texture-indexed retrieval beats date-range on human probes;
+    flashbulb tier survives decay \\
+C1--C2 & D2; D5 reconstruction-vs-lookup & H2, H5, H6 &
+    arousal sets durability tier at write-time; intrusions cluster as
+    schema-consistent \\
+C3 & D4 schema-fusion-vs-hoarding & H4, H14 & storage grows $\sim\log$;
+    routine recall correctly fails per-instance \\
+C5 & D3 anchored-constellations; D9 landmark-relative dating & H3, H9 &
+    ``when'' answered by anchor traversal; interval width tracks error \\
+C6, C8 & D6 subjective-time-density & H-$\tau$ (E1) &
+    \textbf{E1 ablation:} $\tau$-keyed vs wall-keyed decay on
+    burst-quiet stream --- $\tau$ preserves, wall purges \\
+C8 & D7 continuity-vs-discontinuity; D10 precision-as-confidence &
+    H11--H13, H9 & gap-provenance; reported width $=$ confidence \\
+C2, C7 & D9, D10 & H9 & calibrated-confidence interval widths \\
+C1, C3, C5 & D2, D4, D3 & H2, H4, H3 & salience tier, fusion, anchors \\
+-- & D8 drives & H8/H-$\tau$ & curiosity/boredom gates encoding cadence \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
 \section{Polytemporal Representation}
 Every episode carries a heterogeneous \emph{time\_vector} of typed, indexed coordinates (Table~\ref{tab:polytemporal}). No single axis is privileged; each mechanism consumes its own projection. The polytemporal schema enforces this by giving coordinates real types and indexes---no JSONB on any query path.
 

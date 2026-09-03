@@ -72,30 +72,32 @@ Table of Contents
      3.1.  Transport . . . . . . . . . . . . . . . . . . . . . . . .   3
      3.2.  Endpoints . . . . . . . . . . . . . . . . . . . . . . . .   3
      3.3.  Request/response shapes . . . . . . . . . . . . . . . . .   4
-   4.  Authentication  . . . . . . . . . . . . . . . . . . . . . . .   5
-     4.1.  Model . . . . . . . . . . . . . . . . . . . . . . . . . .   5
-     4.2.  Local (development) . . . . . . . . . . . . . . . . . . .   5
-     4.3.  Single shared key . . . . . . . . . . . . . . . . . . . .   5
-     4.4.  Extension . . . . . . . . . . . . . . . . . . . . . . . .   6
-   5.  Federation  . . . . . . . . . . . . . . . . . . . . . . . . .   6
-     5.1.  Peer registration . . . . . . . . . . . . . . . . . . . .   6
-     5.2.  Fan-out semantics . . . . . . . . . . . . . . . . . . . .   6
-     5.3.  Resilience  . . . . . . . . . . . . . . . . . . . . . . .   6
-     5.4.  Recursion guard . . . . . . . . . . . . . . . . . . . . .   6
-     5.5.  Timeout . . . . . . . . . . . . . . . . . . . . . . . . .   6
-   6.  Conformance . . . . . . . . . . . . . . . . . . . . . . . . .   7
-   7.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
-   8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   7
+     3.4.  HTTP error semantics  . . . . . . . . . . . . . . . . . .   5
+   4.  Authentication  . . . . . . . . . . . . . . . . . . . . . . .   6
+     4.1.  Model . . . . . . . . . . . . . . . . . . . . . . . . . .   6
+     4.2.  Local (development) . . . . . . . . . . . . . . . . . . .   6
+     4.3.  Single shared key . . . . . . . . . . . . . . . . . . . .   6
+     4.4.  Extension . . . . . . . . . . . . . . . . . . . . . . . .   7
+   5.  Federation  . . . . . . . . . . . . . . . . . . . . . . . . .   7
+     5.1.  Peer registration . . . . . . . . . . . . . . . . . . . .   7
+     5.2.  Fan-out semantics . . . . . . . . . . . . . . . . . . . .   7
+     5.3.  Peer authentication scope . . . . . . . . . . . . . . . .   7
+     5.4.  Resilience  . . . . . . . . . . . . . . . . . . . . . . .   7
+     5.5.  Recursion guard . . . . . . . . . . . . . . . . . . . . .   8
+     5.6.  Timeout . . . . . . . . . . . . . . . . . . . . . . . . .   8
+   6.  Conformance . . . . . . . . . . . . . . . . . . . . . . . . .   8
+   7.  Security Considerations . . . . . . . . . . . . . . . . . . .   8
+   8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   8
      8.1.  Service Name and Transport Protocol Port Number
-           Registry  . . . . . . . . . . . . . . . . . . . . . . . .   7
-     8.2.  URI Scheme  . . . . . . . . . . . . . . . . . . . . . . .   8
-     8.3.  Expert Review . . . . . . . . . . . . . . . . . . . . . .   8
-     8.4.  Security  . . . . . . . . . . . . . . . . . . . . . . . .   9
-   9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   9
-   10. References  . . . . . . . . . . . . . . . . . . . . . . . . .   9
-     10.1.  Normative References . . . . . . . . . . . . . . . . . .   9
-     10.2.  Informative References . . . . . . . . . . . . . . . . .   9
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   9
+           Registry  . . . . . . . . . . . . . . . . . . . . . . . .   8
+     8.2.  URI Scheme  . . . . . . . . . . . . . . . . . . . . . . .   9
+     8.3.  Expert Review . . . . . . . . . . . . . . . . . . . . . .  10
+     8.4.  Security  . . . . . . . . . . . . . . . . . . . . . . . .  10
+   9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  11
+   10. References  . . . . . . . . . . . . . . . . . . . . . . . . .  11
+     10.1.  Normative References . . . . . . . . . . . . . . . . . .  11
+     10.2.  Informative References . . . . . . . . . . . . . . . . .  11
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  11
 
 1.  Introduction
 
@@ -104,8 +106,6 @@ Table of Contents
    exposes a brain's memory operations, and a one-hop federation model
    that lets recall span many hosts.  The reference implementation is
    positronic-serve (port 2114).
-
-
 
 
 
@@ -249,6 +249,65 @@ Internet-Draft                  PEEP-HTTP                 September 2026
    {"results": [ {"episode_id": "...", "tau": n, "source_host": "local"} ],
     "sources": ["local", "http://10.0.0.5:2114"]}
 
+3.4.  HTTP error semantics
+
+   A server MUST use the following status codes:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 5]
+
+Internet-Draft                  PEEP-HTTP                 September 2026
+
+
+         +=================+====================================+
+         | code            | meaning                            |
+         +=================+====================================+
+         | 200 OK          | successful retrieval, mutation, or |
+         |                 | prune sweep                        |
+         +-----------------+------------------------------------+
+         | 400 Bad Request | request payload violates the data  |
+         |                 | contract (missing text on recall,  |
+         |                 | invalid tau float, malformed JSON) |
+         +-----------------+------------------------------------+
+         | 401             | missing, expired, or invalid       |
+         | Unauthorized    | bearer token                       |
+         +-----------------+------------------------------------+
+         | 404 Not Found   | unknown brain name, or ask with an |
+         |                 | unknown entity cue                 |
+         +-----------------+------------------------------------+
+         | 502 Bad Gateway | peer unreachable during strict     |
+         | / 504 Gateway   | non-federated proxying (federated  |
+         | Timeout         | fan-out drops dead peers instead)  |
+         +-----------------+------------------------------------+
+
+                                 Table 2
+
+   The 400 response body SHOULD name the offending field: {"error":
+   "invalid request", "field": "tau"}.
+
 4.  Authentication
 
 4.1.  Model
@@ -274,10 +333,7 @@ Internet-Draft                  PEEP-HTTP                 September 2026
 
 
 
-
-
-
-Wong                      Expires 6 March 2027                  [Page 5]
+Wong                      Expires 6 March 2027                  [Page 6]
 
 Internet-Draft                  PEEP-HTTP                 September 2026
 
@@ -302,8 +358,7 @@ Internet-Draft                  PEEP-HTTP                 September 2026
 
    1.  run local recall on the configured brain;
 
-   2.  fan out to each peer's /v1/memory/recall (single hop), forwarding
-       the server's own Authorization token when the scheme is single;
+   2.  fan out to each peer's /v1/memory/recall (single hop);
 
    3.  RRF-fuse the hit lists, dedup by episode_id;
 
@@ -311,32 +366,43 @@ Internet-Draft                  PEEP-HTTP                 September 2026
 
    5.  return {results, sources}.
 
-5.3.  Resilience
+5.3.  Peer authentication scope
+
+   Under the single scheme, all participating peers share the *same
+   symmetric cluster token*; the fan-out forwards the server's own token
+   to every registered peer.  This assumes a mesh of mutually trusted
+   nodes.
+
+   Implementations MAY instead maintain *per-peer outbound tokens* (a
+   distinct credential per registered peer URL) when a peer is not fully
+   trusted.  A server MUST NOT forward its master cluster token to a
+   peer it does not trust.  The per-peer map is out-of-band
+   configuration, like the peer list itself.
+
+5.4.  Resilience
 
    A peer that is unreachable, times out, or returns an error MUST be
    skipped — recall MUST NOT fail because one peer is down.  The
    response degrades to the healthy subset.
 
-5.4.  Recursion guard
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 7]
+
+Internet-Draft                  PEEP-HTTP                 September 2026
+
+
+5.5.  Recursion guard
 
    Peers MUST be queried at their plain /v1/memory/recall (single hop).
    A server MUST NOT recurse into a peer's /v1/memory/federated_recall.
 
-5.5.  Timeout
+5.6.  Timeout
 
    The default per-peer timeout SHOULD be 3 seconds.  A server MAY make
    this configurable.
-
-
-
-
-
-
-
-Wong                      Expires 6 March 2027                  [Page 6]
-
-Internet-Draft                  PEEP-HTTP                 September 2026
-
 
 6.  Conformance
 
@@ -372,6 +438,18 @@ Internet-Draft                  PEEP-HTTP                 September 2026
    IANA is requested to register the following service name and port per
    [RFC6335]:
 
+
+
+
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 8]
+
+Internet-Draft                  PEEP-HTTP                 September 2026
+
+
       +=========+===========+======+===================+===========+
       | Service | Transport | Port | Description       | Reference |
       | Name    | Protocol  |      |                   |           |
@@ -381,24 +459,18 @@ Internet-Draft                  PEEP-HTTP                 September 2026
       |         |           |      | (HTTP transport)  |           |
       +---------+-----------+------+-------------------+-----------+
 
-                                 Table 2
+                                 Table 3
 
    *  *Service name:* peep — length 4, valid per the RFC 6335 service-
       name syntax.
 
-
-
-
-Wong                      Expires 6 March 2027                  [Page 7]
-
-Internet-Draft                  PEEP-HTTP                 September 2026
-
-
    *  *Port:* 2114 — in the Registered range (1024-49151); verified
       unassigned.
 
-   *  *Description:* the PEEP-HTTP transport for polytemporal memory
-      (brain-as-a-service + federation).
+   *  *Description:* Port 2114 is requested for the Positronic Engram
+      Exchange Protocol (PEEP), providing low-latency, deterministic
+      transport for polytemporal memory stores, episodic consolidation,
+      and federated reciprocal-rank recall.
 
    *  *Note (NDR-2114):* the port number doubles as a mnemonic — "2" for
       bi (Bicentennial Man, model NDR-114).  The assignee is the PEEP
@@ -406,8 +478,9 @@ Internet-Draft                  PEEP-HTTP                 September 2026
 
 8.2.  URI Scheme
 
-   IANA is requested to register the following URI scheme in the
-   "Uniform Resource Identifier (URI) Schemes" registry per [RFC7595]:
+   IANA is requested to register the *peep* URI scheme as a
+   *Provisional* registration in the "Uniform Resource Identifier (URI)
+   Schemes" registry per [RFC7595]:
 
        +========+=====================================+===========+
        | Scheme | Description                         | Reference |
@@ -417,13 +490,45 @@ Internet-Draft                  PEEP-HTTP                 September 2026
        |        | or a PEEP data object               |           |
        +--------+-------------------------------------+-----------+
 
-                                 Table 3
+                                 Table 4
 
-   *  *Syntax:* peep://<host>[:<port>]/v1/memory/<operation> for the
-      service; peep: followed by a PEEP-0001 object reference for data
-      addressing.
+   *Registration tree:* Provisional.  The scheme is specified by an open
+   specification with a public reference implementation; it may be
+   elevated to Permanent once it demonstrates widespread deployment, as
+   [RFC7595] allows.
 
-   *  *Character encoding:* ASCII (as used in HTTP URLs).
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 9]
+
+Internet-Draft                  PEEP-HTTP                 September 2026
+
+
+   *ABNF syntax* — the peep URI conforms to [RFC3986] and is defined by
+   the following [RFC5234] ABNF:
+
+   peep-URI      = "peep:" hier-part [ "?" query ] [ "#" fragment ]
+   hier-part     = "//" authority path-abempty
+   authority     = host [ ":" port ]
+   host          = IP-literal / IPv4address / reg-name
+   port          = *DIGIT
+   path-abempty  = *( "/" segment )
+
+   Examples:
+
+   peep://10.0.0.5:2114/v1/memory/recall
+   peep://node1.local/v1/memory/ask
+   peep://10.0.0.5:2114/v1/memory/ask?object=auth-system
+
+   The host component addresses a PEEP-HTTP server; the path names the
+   operation (/v1/memory/<operation>).  There is no opaque peep: object
+   form — all peep URIs are hierarchical and resolve to a service
+   endpoint.  This avoids the ambiguous split between a service form and
+   an opaque object form.
+
+   *  *Character encoding:* ASCII, per [RFC3986].
 
    *  *Intended usage:* locates a PEEP-compliant memory service, for use
       by agents and client libraries.
@@ -440,22 +545,22 @@ Internet-Draft                  PEEP-HTTP                 September 2026
    and (c) the scheme is used in a manner consistent with its
    specification.
 
-
-
-
-
-
-Wong                      Expires 6 March 2027                  [Page 8]
-
-Internet-Draft                  PEEP-HTTP                 September 2026
-
-
 8.4.  Security
 
    The port and scheme registrations carry no security considerations
    beyond those above: a peep:// service MUST use TLS when not bound to
    loopback, and the scheme MUST NOT be used to signal trust in the
    payload content.
+
+
+
+
+
+
+Wong                      Expires 6 March 2027                 [Page 10]
+
+Internet-Draft                  PEEP-HTTP                 September 2026
+
 
 9.  Acknowledgements
 
@@ -469,6 +574,16 @@ Internet-Draft                  PEEP-HTTP                 September 2026
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC3986]  Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
+              Resource Identifier (URI): Generic Syntax", STD 66,
+              RFC 3986, DOI 10.17487/RFC3986, January 2005,
+              <https://www.rfc-editor.org/rfc/rfc3986>.
+
+   [RFC5234]  Crocker, D., Ed. and P. Overell, "Augmented BNF for Syntax
+              Specifications: ABNF", STD 68, RFC 5234,
+              DOI 10.17487/RFC5234, January 2008,
+              <https://www.rfc-editor.org/rfc/rfc5234>.
 
    [RFC6335]  Cotton, M., Eggert, L., Touch, J., Westerlund, M., and S.
               Cheshire, "Internet Assigned Numbers Authority (IANA)
@@ -498,7 +613,4 @@ Author's Address
 
 
 
-
-
-
-Wong                      Expires 6 March 2027                  [Page 9]
+Wong                      Expires 6 March 2027                 [Page 11]

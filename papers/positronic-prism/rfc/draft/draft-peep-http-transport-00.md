@@ -22,6 +22,8 @@ author:
 
 normative:
   RFC2119:
+  RFC3986:
+  RFC5234:
   RFC6335:
   RFC7595:
 
@@ -159,6 +161,21 @@ Response — PEEP-0001 hits, each tagged with `source_host`, plus `sources`:
  "sources": ["local", "http://10.0.0.5:2114"]}
 ~~~
 
+## HTTP error semantics
+
+A server MUST use the following status codes:
+
+| code | meaning |
+|---|---|
+| `200 OK` | successful retrieval, mutation, or prune sweep |
+| `400 Bad Request` | request payload violates the data contract (missing `text` on recall, invalid `tau` float, malformed JSON) |
+| `401 Unauthorized` | missing, expired, or invalid bearer token |
+| `404 Not Found` | unknown brain name, or ask with an unknown entity cue |
+| `502 Bad Gateway` / `504 Gateway Timeout` | peer unreachable during strict non-federated proxying (federated fan-out drops dead peers instead) |
+
+The `400` response body SHOULD name the offending field:
+`{"error": "invalid request", "field": "tau"}`.
+
 # Authentication
 
 ## Model
@@ -198,11 +215,21 @@ A server's configured peers are a list of base URLs, registered out-of-band
 `federated_recall` MUST:
 
 1. run local recall on the configured brain;
-2. fan out to each peer's `/v1/memory/recall` (single hop), forwarding the
-   server's own `Authorization` token when the scheme is `single`;
+2. fan out to each peer's `/v1/memory/recall` (single hop);
 3. RRF-fuse the hit lists, dedup by `episode_id`;
 4. tag each hit with its `source_host`;
 5. return `{results, sources}`.
+
+## Peer authentication scope
+
+Under the `single` scheme, all participating peers share the **same
+symmetric cluster token**; the fan-out forwards the server's own token to
+every registered peer. This assumes a mesh of mutually trusted nodes.
+
+Implementations MAY instead maintain **per-peer outbound tokens** (a distinct
+credential per registered peer URL) when a peer is not fully trusted. A
+server MUST NOT forward its master cluster token to a peer it does not trust.
+The per-peer map is out-of-band configuration, like the peer list itself.
 
 ## Resilience
 
@@ -256,24 +283,54 @@ IANA is requested to register the following service name and port per
 - **Service name:** `peep` — length 4, valid per the RFC 6335 service-name
   syntax.
 - **Port:** 2114 — in the Registered range (1024-49151); verified unassigned.
-- **Description:** the PEEP-HTTP transport for polytemporal memory
-  (brain-as-a-service + federation).
+- **Description:** Port 2114 is requested for the Positronic Engram Exchange
+  Protocol (PEEP), providing low-latency, deterministic transport for
+  polytemporal memory stores, episodic consolidation, and federated
+  reciprocal-rank recall.
 - **Note (NDR-2114):** the port number doubles as a mnemonic — "2" for bi
   (Bicentennial Man, model NDR-114). The assignee is the PEEP protocol
   project (Shing Wong).
 
 ## URI Scheme
 
-IANA is requested to register the following URI scheme in the "Uniform
-Resource Identifier (URI) Schemes" registry per {{RFC7595}}:
+IANA is requested to register the **`peep`** URI scheme as a **Provisional**
+registration in the "Uniform Resource Identifier (URI) Schemes" registry per
+{{RFC7595}}:
 
 | Scheme | Description | Reference |
 |---|---|---|
 | `peep` | Positronic Engram Exchange Protocol - locate a PEEP-HTTP memory service or a PEEP data object | this document |
 
-- **Syntax:** `peep://<host>[:<port>]/v1/memory/<operation>` for the service;
-  `peep:` followed by a PEEP-0001 object reference for data addressing.
-- **Character encoding:** ASCII (as used in HTTP URLs).
+**Registration tree:** Provisional. The scheme is specified by an open
+specification with a public reference implementation; it may be elevated to
+Permanent once it demonstrates widespread deployment, as {{RFC7595}} allows.
+
+**ABNF syntax** — the `peep` URI conforms to {{RFC3986}} and is defined by
+the following {{RFC5234}} ABNF:
+
+~~~ abnf
+peep-URI      = "peep:" hier-part [ "?" query ] [ "#" fragment ]
+hier-part     = "//" authority path-abempty
+authority     = host [ ":" port ]
+host          = IP-literal / IPv4address / reg-name
+port          = *DIGIT
+path-abempty  = *( "/" segment )
+~~~
+
+Examples:
+
+~~~
+peep://10.0.0.5:2114/v1/memory/recall
+peep://node1.local/v1/memory/ask
+peep://10.0.0.5:2114/v1/memory/ask?object=auth-system
+~~~
+
+The host component addresses a PEEP-HTTP server; the path names the
+operation (`/v1/memory/<operation>`). There is no opaque `peep:` object form
+— all `peep` URIs are hierarchical and resolve to a service endpoint. This
+avoids the ambiguous split between a service form and an opaque object form.
+
+- **Character encoding:** ASCII, per {{RFC3986}}.
 - **Intended usage:** locates a PEEP-compliant memory service, for use by
   agents and client libraries.
 - **Applications using the scheme:** PEEP-compliant agents, the

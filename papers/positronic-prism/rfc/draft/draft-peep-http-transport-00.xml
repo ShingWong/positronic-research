@@ -32,7 +32,7 @@
     <abstract>
 
 
-<?line 38?>
+<?line 40?>
 
 <t>This document specifies the HTTP transport for PEEP-0001 payloads: how a
 polytemporal memory service exposes its brains to clients, and how federated
@@ -56,7 +56,7 @@ Registry, and the "peep" URI scheme in the IANA URI Schemes registry.</t>
   <middle>
 
 
-<?line 51?>
+<?line 53?>
 
 <section anchor="introduction"><name>Introduction</name>
 
@@ -204,6 +204,29 @@ read-only discovery endpoints (<spanx style="verb">/healthz</spanx>, <spanx styl
 ]]></sourcecode></figure>
 
 </section>
+<section anchor="http-error-semantics"><name>HTTP error semantics</name>
+
+<t>A server MUST use the following status codes:</t>
+
+<texttable>
+      <ttcol align='left'>code</ttcol>
+      <ttcol align='left'>meaning</ttcol>
+      <c><spanx style="verb">200 OK</spanx></c>
+      <c>successful retrieval, mutation, or prune sweep</c>
+      <c><spanx style="verb">400 Bad Request</spanx></c>
+      <c>request payload violates the data contract (missing <spanx style="verb">text</spanx> on recall, invalid <spanx style="verb">tau</spanx> float, malformed JSON)</c>
+      <c><spanx style="verb">401 Unauthorized</spanx></c>
+      <c>missing, expired, or invalid bearer token</c>
+      <c><spanx style="verb">404 Not Found</spanx></c>
+      <c>unknown brain name, or ask with an unknown entity cue</c>
+      <c><spanx style="verb">502 Bad Gateway</spanx> / <spanx style="verb">504 Gateway Timeout</spanx></c>
+      <c>peer unreachable during strict non-federated proxying (federated fan-out drops dead peers instead)</c>
+</texttable>
+
+<t>The <spanx style="verb">400</spanx> response body SHOULD name the offending field:
+<spanx style="verb">{"error": "invalid request", "field": "tau"}</spanx>.</t>
+
+</section>
 </section>
 <section anchor="authentication"><name>Authentication</name>
 
@@ -253,12 +276,23 @@ behind the <spanx style="verb">KeyManager</spanx> contract. The server MUST only
 
 <t><list style="numbers" type="1">
   <t>run local recall on the configured brain;</t>
-  <t>fan out to each peer's <spanx style="verb">/v1/memory/recall</spanx> (single hop), forwarding the
-server's own <spanx style="verb">Authorization</spanx> token when the scheme is <spanx style="verb">single</spanx>;</t>
+  <t>fan out to each peer's <spanx style="verb">/v1/memory/recall</spanx> (single hop);</t>
   <t>RRF-fuse the hit lists, dedup by <spanx style="verb">episode_id</spanx>;</t>
   <t>tag each hit with its <spanx style="verb">source_host</spanx>;</t>
   <t>return <spanx style="verb">{results, sources}</spanx>.</t>
 </list></t>
+
+</section>
+<section anchor="peer-authentication-scope"><name>Peer authentication scope</name>
+
+<t>Under the <spanx style="verb">single</spanx> scheme, all participating peers share the <strong>same
+symmetric cluster token</strong>; the fan-out forwards the server's own token to
+every registered peer. This assumes a mesh of mutually trusted nodes.</t>
+
+<t>Implementations MAY instead maintain <strong>per-peer outbound tokens</strong> (a distinct
+credential per registered peer URL) when a peer is not fully trusted. A
+server MUST NOT forward its master cluster token to a peer it does not trust.
+The per-peer map is out-of-band configuration, like the peer list itself.</t>
 
 </section>
 <section anchor="resilience"><name>Resilience</name>
@@ -331,8 +365,10 @@ unassigned against the IANA registries at the time of writing (2026-09-02).</t>
   <t><strong>Service name:</strong> <spanx style="verb">peep</spanx> — length 4, valid per the RFC 6335 service-name
 syntax.</t>
   <t><strong>Port:</strong> 2114 — in the Registered range (1024-49151); verified unassigned.</t>
-  <t><strong>Description:</strong> the PEEP-HTTP transport for polytemporal memory
-(brain-as-a-service + federation).</t>
+  <t><strong>Description:</strong> Port 2114 is requested for the Positronic Engram Exchange
+Protocol (PEEP), providing low-latency, deterministic transport for
+polytemporal memory stores, episodic consolidation, and federated
+reciprocal-rank recall.</t>
   <t><strong>Note (NDR-2114):</strong> the port number doubles as a mnemonic — "2" for bi
 (Bicentennial Man, model NDR-114). The assignee is the PEEP protocol
 project (Shing Wong).</t>
@@ -341,8 +377,9 @@ project (Shing Wong).</t>
 </section>
 <section anchor="uri-scheme"><name>URI Scheme</name>
 
-<t>IANA is requested to register the following URI scheme in the "Uniform
-Resource Identifier (URI) Schemes" registry per <xref target="RFC7595"/>:</t>
+<t>IANA is requested to register the <strong><spanx style="verb">peep</spanx></strong> URI scheme as a <strong>Provisional</strong>
+registration in the "Uniform Resource Identifier (URI) Schemes" registry per
+<xref target="RFC7595"/>:</t>
 
 <texttable>
       <ttcol align='left'>Scheme</ttcol>
@@ -353,10 +390,37 @@ Resource Identifier (URI) Schemes" registry per <xref target="RFC7595"/>:</t>
       <c>this document</c>
 </texttable>
 
+<t><strong>Registration tree:</strong> Provisional. The scheme is specified by an open
+specification with a public reference implementation; it may be elevated to
+Permanent once it demonstrates widespread deployment, as <xref target="RFC7595"/> allows.</t>
+
+<t><strong>ABNF syntax</strong> — the <spanx style="verb">peep</spanx> URI conforms to <xref target="RFC3986"/> and is defined by
+the following <xref target="RFC5234"/> ABNF:</t>
+
+<figure><sourcecode type="abnf"><![CDATA[
+peep-URI      = "peep:" hier-part [ "?" query ] [ "#" fragment ]
+hier-part     = "//" authority path-abempty
+authority     = host [ ":" port ]
+host          = IP-literal / IPv4address / reg-name
+port          = *DIGIT
+path-abempty  = *( "/" segment )
+]]></sourcecode></figure>
+
+<t>Examples:</t>
+
+<figure><artwork><![CDATA[
+peep://10.0.0.5:2114/v1/memory/recall
+peep://node1.local/v1/memory/ask
+peep://10.0.0.5:2114/v1/memory/ask?object=auth-system
+]]></artwork></figure>
+
+<t>The host component addresses a PEEP-HTTP server; the path names the
+operation (<spanx style="verb">/v1/memory/&lt;operation&gt;</spanx>). There is no opaque <spanx style="verb">peep:</spanx> object form
+— all <spanx style="verb">peep</spanx> URIs are hierarchical and resolve to a service endpoint. This
+avoids the ambiguous split between a service form and an opaque object form.</t>
+
 <t><list style="symbols">
-  <t><strong>Syntax:</strong> <spanx style="verb">peep://&lt;host&gt;[:&lt;port&gt;]/v1/memory/&lt;operation&gt;</spanx> for the service;
-<spanx style="verb">peep:</spanx> followed by a PEEP-0001 object reference for data addressing.</t>
-  <t><strong>Character encoding:</strong> ASCII (as used in HTTP URLs).</t>
+  <t><strong>Character encoding:</strong> ASCII, per <xref target="RFC3986"/>.</t>
   <t><strong>Intended usage:</strong> locates a PEEP-compliant memory service, for use by
 agents and client libraries.</t>
   <t><strong>Applications using the scheme:</strong> PEEP-compliant agents, the
@@ -410,6 +474,35 @@ the scheme MUST NOT be used to signal trust in the payload content.</t>
   <seriesInfo name="BCP" value="14"/>
   <seriesInfo name="RFC" value="2119"/>
   <seriesInfo name="DOI" value="10.17487/RFC2119"/>
+</reference>
+<reference anchor="RFC3986">
+  <front>
+    <title>Uniform Resource Identifier (URI): Generic Syntax</title>
+    <author fullname="T. Berners-Lee" initials="T." surname="Berners-Lee"/>
+    <author fullname="R. Fielding" initials="R." surname="Fielding"/>
+    <author fullname="L. Masinter" initials="L." surname="Masinter"/>
+    <date month="January" year="2005"/>
+    <abstract>
+      <t>A Uniform Resource Identifier (URI) is a compact sequence of characters that identifies an abstract or physical resource. This specification defines the generic URI syntax and a process for resolving URI references that might be in relative form, along with guidelines and security considerations for the use of URIs on the Internet. The URI syntax defines a grammar that is a superset of all valid URIs, allowing an implementation to parse the common components of a URI reference without knowing the scheme-specific requirements of every possible identifier. This specification does not define a generative grammar for URIs; that task is performed by the individual specifications of each URI scheme. [STANDARDS-TRACK]</t>
+    </abstract>
+  </front>
+  <seriesInfo name="STD" value="66"/>
+  <seriesInfo name="RFC" value="3986"/>
+  <seriesInfo name="DOI" value="10.17487/RFC3986"/>
+</reference>
+<reference anchor="RFC5234">
+  <front>
+    <title>Augmented BNF for Syntax Specifications: ABNF</title>
+    <author fullname="D. Crocker" initials="D." role="editor" surname="Crocker"/>
+    <author fullname="P. Overell" initials="P." surname="Overell"/>
+    <date month="January" year="2008"/>
+    <abstract>
+      <t>Internet technical specifications often need to define a formal syntax. Over the years, a modified version of Backus-Naur Form (BNF), called Augmented BNF (ABNF), has been popular among many Internet specifications. The current specification documents ABNF. It balances compactness and simplicity with reasonable representational power. The differences between standard BNF and ABNF involve naming rules, repetition, alternatives, order-independence, and value ranges. This specification also supplies additional rule definitions and encoding for a core lexical analyzer of the type common to several Internet specifications. [STANDARDS-TRACK]</t>
+    </abstract>
+  </front>
+  <seriesInfo name="STD" value="68"/>
+  <seriesInfo name="RFC" value="5234"/>
+  <seriesInfo name="DOI" value="10.17487/RFC5234"/>
 </reference>
 <reference anchor="RFC6335">
   <front>
@@ -472,98 +565,119 @@ the scheme MUST NOT be used to signal trust in the payload content.</t>
   </back>
 
 <!-- ##markdown-source:
-H4sIAAAAAAAAA51a63IbtxX+j6fAMD9KMlzqYjuNaTdTxZYTtbKkSvJkOpmO
-F9wFyY2WCxbYFU1LyvQh+oR9kn7nAHuhLo1TeyzvDQfn8p0rFEWRKLMy1xPZ
-OzMuK60pskQeFnOrlvLwU7JQxVzLM2tKk5h8In+8vDyTl1YVbmVs2RNqOrX6
-eiLPDg/PInopUpMUagmCqVWzMlppvYoWZbmKynpVtLsrElXqubGbicyKmRHZ
-yk5kaStX7u/uvtzdF8pqNZE/6EJblQtXTZeZc5kpLjcrTWtSvdL4UZRCuFIV
-6UeVm0IzDS1W2URI6bCV1TM3kRvt6H6z7N5CIH8pVFUujKUlEf5JUMdHF2P5
-kynm/MDLc7HIinn70Ng5xA464yd6qTKoyK3xyZ9dWSlbJqZwVV5i4dyaajVO
-zFKIwtilKrNrTVuev3uzv7f3Mlx+8+zZi3D5xxcvcSlIPZ3PWc+7u7t7E97y
-d9nuWF/rXO7Jt6pU8o0pYJAEJiQ6rQroT/RQBU+qIYUhJ3J/d/+baPdlBMvR
-Q6dtph2xXpMkvieSGBciiiKppo63F+JykTkJ0FRLWFO6lU6yGRbLcqE92hrc
-SGiiVYBcqU1uVApGF2YtlViZfFPqJb5UuVzqJdBFjFxniZb608o4EM1KJ6dW
-QTzYXyZ5hj3dSAJATGSmU+Ct1KmwOlF5LmfYWpqqlCqxxjkJNFt86Uo3lkel
-TPUsKwKvgOPKZEzO6n9W2pU7VoPvwmnhFmqlaR+oGTtmQD+wLJcm1bnfPexM
-Tx1wRN9giwMWAFuWC1VKgImw4ARYL0lrQVmBGh40XhgBaKs8A51Xsr6EGvAJ
-qJF+UzndENtCf9JJVapprmv6/OUcWhjfN06Qy8tr9TwjG/LeZsbPeuTtvUbr
-BBiW7vLNmWALAurPAS7++Ojg5EBehE9Pmk8ba9fAhZPh7qRaTrUV537Xjdda
-Z88P50fSJQsNMl369PiCH7ua483YQ3CZpWmuhfhKHsEVTFolJIoQLcJubprr
-u7vG2MM1jDGUSm4BLqARKh5L0ppotNasI4TBdEtzDR7L4QQkELtKnWsgi6Fe
-K47NXWNWCUbsH1wNarMKUAnIVRKhL1qYVRdFjC1PKNclCU+AFm6l8E4VmxrF
-l2zKmbaaAQKoaOK6gVS8akJLxGCMZZ/MI8iUA4aI7rgoVgyHAGfBnDXiDSEt
-og+YDzLgegrN5JqAxs4IB2YjaNuVFCKSLYMbLEyeOlkYgiruHXP5wIEy1pmp
-kB9S8uCIHHidlQtSAjKNgSYicHwlZxXlFNk/P383YFVY9hFswJzPKihMc97h
-PfzGhWagRMZS9MAWjcPKqd4YfMe2RKjR+WxM+LrUdpkVJjfzjdfXld7ItbGQ
-pff+w8Vlb+T/lyenfH1++LcPR+eHb+n64seD4+Pmov7i4sfTD8d4L8JVu/LN
-6fv3hydv/eL3B3/vefX0Ts8uj05PDo573j26bo1cSwaYaiSbUtuV1SSVwhfa
-JTab4gZrbm5Cqrq7Q2BCbCTfaGDvIxyT8nhPBa/pOBCr4nvl2pSEB1+1Dg+v
-ZM3t7I33kF399f54dyzPfdxhQeqYKqcmpTTBeptq+eHyXfSt/MvF6QkyTj9W
-K8Q8Hxh3fnGmiAHViMEO9hRSslzrPI+uCrMuZItcAvVwOOawBHxJKFBOUW1I
-AxRa/tC9wgYhc/jd08wlxkdp7WnNrFny3ZTE/XB+TJuTzuKd670dD+6dYdzm
-DFZcfHZ6cRmzlImygL9ieUjSzVgeowIoKFLgPThAfZRGpsg3zfabDrl+vLPQ
-Ki8Xn+OR37T1jx1KYi4e0J4gFP9weBmP2RSH9XohbuGCKAlSeQsTw3PwXzWF
-RnHhUbFiV7sVtwilW/+wlEniy5YJ3KDUws88SDGR8Y25mkA2gwzIAQ6VU2lH
-nGIdlXjlXSyZmlfL7ZbyfDijp3DK205VEBL3gjJ9/2tEEOIT8dlMf4HfQllz
-IGnwNGHlrh6hmiL5Z7AwVSCK81paU3ySEtV+Js+oQGoorm1WIs/J9h1n/Gq5
-VGS/a3LHJwmubFW0pHAjS1VFKQTeSHpHdZnxuY/U7LX6NDl8DlU09PwtSafX
-dfzVq8whjzxNoymYPt4zSE5BVn7tCyb/biQRZiOEXOhuGyWPwbNBDFUl2byy
-WMXEcuRwrCe8nt+rs0IUEoJ5lQ/hgno6rMHVr7/+Kik0iJteqT+VPZTRlNkB
-kRTBATBPMoiuppQ92LNB21JUvcKn346E7G1ZEQ+LiqSkx0Tw4xqBw6zxfPeO
-NqO9A5//+de/oegHoA3BdJs3CIdw5UDmZ3nTCxb5mKXE73g8JoYAA9ztvXz2
-Yvwct2vQat421Xv407sCV/QWFZFTc03rnaJwlmhidfwCD2agMFUJCYpLp+/k
-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
-HfMTH69TH+49QOvoOxb/BeGJR+iqJgAA
+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
+tKmMJup/AUYCAJdoLwAA
 
 -->
 

@@ -1,8 +1,8 @@
 \begin{table}[t]\centering\caption{LongMemEval real $n{=}50$ — archival (primary) vs lexical ablation. $acc$ via 70b hybrid judge (meta-llama/llama-3.3-70b-instruct). Local BGE :8090 (fix 512tok $\to$ 1200c BATCH8); commodity answer model DeepSeek-V4-Flash; stream-windowed retrieval.}\label{tab:lme50}
-\begin{tabular}{lcccc}\toprule
+\resizebox{\columnwidth}{!}{\begin{tabular}{lcccc}\toprule
 Profile/Embed & fallback & $acc_{with}$ & $acc_{without}$ & $\Delta$ \\ \midrule
 archival/local & 0.00 & 0.90 & 0.12 & 0.78 \\
 balanced/lexical & 1.00 & 0.10 & 0.10 & 0.00 \\
-\bottomrule\end{tabular}
+\bottomrule\end{tabular}}
 \\{\footnotesize Archival/local $n{=}50$ hybrid: $0.90/0.12$ $\Delta$ $0.78$ (recall $1.0$, fallback $0.0$, clean single run). Retrieval placed the gold in context on all $50$ questions; all five misses are answer-model extraction failures, isolated by the PRISM methodology. Lexical ablation fallback $1.0$ shows decay mechanism; E7 $55/55/35/11$ isolates policy.}
 \end{table}

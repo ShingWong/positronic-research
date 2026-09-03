@@ -15,6 +15,7 @@
 \setlength{\pdfpageheight}{11in}
 \pdfinfo{/TemplateVersion (2026.1)}
 \usepackage{amsmath,amssymb,booktabs}
+\usepackage{nameref}
 % ENGRAM_TAG=v0.2.0
 \title{Temporal Perception in AI: Re-Deriving Time for Agent Memory}
 \author{Shing Wong}
@@ -109,7 +110,7 @@ C1, C3, C5 & D2, D4, D3 & H2, H4, H3 & salience tier, fusion, anchors \\
 \end{tabular}
 \end{table*}
 
-\section{Polytemporal Representation}
+\section{Polytemporal Representation}\label{sec:poly}
 Every episode carries a heterogeneous \emph{time\_vector} of typed, indexed coordinates (Table~\ref{tab:polytemporal}). No single axis is privileged; each mechanism consumes its own projection. The polytemporal schema enforces this by giving coordinates real types and indexes---no JSONB on any query path.
 
 \begin{table}[t]\centering\begin{tabular}{ll}\toprule Coordinate & Type \\ \midrule wall & timestamptz \\ mono & bigint \\ tau & double \\ fuzz & tstzrange \\ \bottomrule\end{tabular}\caption{Polytemporal vector (typed, indexed).}\label{tab:polytemporal}\end{table}
@@ -163,7 +164,7 @@ Recall is \emph{Activate}$\cdot$\emph{Reconstruct}$\cdot$\emph{Decay}$\cdot$\emp
 \section{Experiments}
 We test whether retention profiles alone induce divergent forgetting and whether $\tau$-keyed decay outperforms wall-clock on real long-context recall. All runs use ENGRAM\_TAG=v0.2.0. The results are proof-of-concept: they measure the \emph{relative} gain of polytemporal indexing and salience-gated retention under realistic deployment constraints (single-session-user slice, truncated $30$k-character baseline), not a full benchmark sweep.
 
-\textbf{Implementation.} All experiments run on the actual engine, Positronic-Engram (v0.2.0): an SQLite-backed MemoryEngine with the polytemporal schema of the Polytemporal Representation section, FTS5 full-text search, a flat vector index over BGE-M3 embeddings, the gate-at-encoding loop, and the $\Delta\tau$ prune ladder. Nothing is simulated: E7 replays real ingested episodes through the engine's weekly prune, the $n{=}50$ LongMemEval run exercises the real retrieval path (top-$8$ stream-windowed, hybrid $70$b judge), and the E1 ablation toggles a single flag in the same codebase. Code, data, and retention policies are committed alongside the benchmark results (see Reproducibility Checklist).
+\textbf{Implementation.} All experiments run on the actual engine, Positronic-Engram (v0.2.0): an SQLite-backed MemoryEngine with the polytemporal schema of Section~\nameref{sec:poly}, FTS5 full-text search, a flat vector index over BGE-M3 embeddings, the gate-at-encoding loop, and the $\Delta\tau$ prune ladder. Nothing is simulated: E7 replays real ingested episodes through the engine's weekly prune, the $n{=}50$ LongMemEval run exercises the real retrieval path (top-$8$ stream-windowed, hybrid $70$b judge), and the E1 ablation toggles a single flag in the same codebase. Code, data, and retention policies are committed alongside the benchmark results (see Reproducibility Checklist).
 
 \subsection{E7 --- Identical Experience, Divergent Forgetting}
 Four brains ingest identical $55$ messages over $78$~weeks with a weekly prune ladder driven by each profile's merge/expire thresholds per \citet{zhong2023memorybank}. Only the retention policy varies (Table~\ref{tab:e7}, Fig.~\ref{fig:e7}). Archival and long\_term retain broadly, balanced is selective, short\_term forgets aggressively---reported as $55$/$55$/$35$/$11$ (E7). \emph{Takeaway: retention policy alone, on identical input, yields $55$/$55$/$35$/$11$ survivors---forgetting is a policy choice, not a model property.}
@@ -195,7 +196,7 @@ Real LongMemEval $n{=}50$ (xiaowu0162/longmemeval longmemeval\_s, $500$ per-mess
 
 The ablation localizes the mechanism. A lexical index over the same corpus does not recover accuracy: on the balanced/lexical configuration the index retrieves nothing usable on all $50$ questions (fallback $1.00$, $acc$ $0.10$). This collapse is expected, not an implementation artifact: LongMemEval questions are written in conversational paraphrase---``the project Jack quit'' for a stored phrase ``jack quit the project''---so the query and its gold share zero exact lexical tokens with the source episode, and FTS5-style lexical matching without semantic grounding cannot activate. That is precisely why the initial activation step requires semantic embeddings (BGE-M3), with lexical search retained as an exact-identifier fallback rather than a primary index. The limiting factor is not \emph{locating} candidate text but \emph{presenting the gold within a distraction-free window}: the polytemporal configuration placed the gold in context on all $50$ questions (recall $1.0$, fallback $0.0$), reducing the task from joint find-and-extract to extract-only --- the condition in which a commodity answer model reaches $acc$ $0.90$ vs.\ $0.12$. \emph{Takeaway: polytemporal retrieval places the gold in context on all $50$ questions; lexical retrieval places it on none; the accuracy difference is thus due to retrieval, not to the model.} Retrieval quality is the causal variable: given the gold in context, accuracy is bounded by the answer model's extraction ($5$ of $50$ failures, all attributed to extraction rather than retrieval); given only a lexical index, no answer model could recover.
 
-\paragraph{RULER Efficiency.} In the RULER Efficiency appendix: across $4$--$32$k contexts, top-$8$ retrieval uses a flat $242$~tok vs.\ a linearly growing full haystack ($2.2$--$18$k~tok), a $1/10$--$1/74$ reduction, preserving recall@1 $1.0$ (Fig.~\ref{fig:ruler}); see also \texttt{figs/ruler\_efficiency.pdf}.
+\paragraph{RULER Efficiency.} Across $4$--$32$k contexts, top-$8$ retrieval uses a flat $242$~tok vs.\ a linearly growing full haystack ($2.2$--$18$k~tok), a $1/10$--$1/74$ reduction, preserving recall@1 $1.0$ (Fig.~\ref{fig:ruler}); full sweep in the RULER Efficiency appendix; see also \texttt{figs/ruler\_efficiency.pdf}.
 
 \paragraph{Token reduction (real LongMemEval $n{=}50$).} The same retrieval reads a mean $1{,}569$~tok per question (top-8 stream-windowed snippets) vs.\ the $30$k-character baseline's $7{,}500$~tok -- a $4.8\times$ in-run reduction ($79\%$ fewer tokens). Against the full LongMemEval corpus ($\sim115$k~tok average), the true reduction is $\sim73\times$. The $30$k-character truncation is not a strawman: it is the operating budget of a commodity edge-window deployment---the $32$k context boundary of standard open-weight models---and is applied identically to both arms of the comparison. Full-corpus evaluation across all six question categories is actively queued for the expanded full-length manuscript.
 

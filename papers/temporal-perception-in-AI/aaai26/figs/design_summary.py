@@ -43,9 +43,9 @@ def arrow(x1, y1, x2, y2):
 # ---- Lane 1: encoding (top) ----
 box(2, 62, 21, 36, "EVENT",
     "time_vector\n(wall, mono,\nτ, fuzz)", "#dbeafe")
-box(29, 62, 20, 36, "GATE (write-time)",
+box(29, 62, 20, 36, "GATE",
     "salience s =\nsurprise × goal\nset durability tier", "#dcfce7")
-box(55, 62, 20, 36, "DECAY / CONSOLIDATE",
+box(55, 62, 21, 36, "DECAY",
     "Δτ drives decay,\nconsolidation,\nrecall (E1)", "#fef9c3")
 box(81, 62, 17, 36, "ANCHORS",
     "constellations\nreplace flat\nchronologies", "#fce7f3")

@@ -144,10 +144,11 @@ replace flat chronologies} as the primary temporal index (H3).
 
 \begin{figure}[t]\centering
 \includegraphics[width=0.99\columnwidth]{figs/design_summary.pdf}
-\caption{Design summary: events carry (wall, mono, $\tau$, fuzz); encoding is
-gated by salience at write-time; decay, consolidation, and recall operate on
-$\Delta\tau$, not wall-clock; anchor constellations replace flat
-chronologies.}
+\caption{Design summary. Encoding (top): events carry (wall, mono, $\tau$,
+fuzz); salience gates durability at write-time; decay, consolidation, and
+recall operate on $\Delta\tau$, not wall-clock; anchor constellations replace
+flat chronologies. Recall (bottom): Activate $\to$ Reconstruct $\to$ Decay
+$\to$ Fuse.}
 \label{fig:design}
 \end{figure}
 

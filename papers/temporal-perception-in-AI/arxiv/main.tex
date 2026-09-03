@@ -119,7 +119,7 @@ The full schema assigns a type and index to every coordinate. \texttt{wall} \tex
 The central quantity is subjective time $\tau$, defined once and used throughout.
 \begin{equation}\resizebox{0.9\columnwidth}{!}{$\boxed{\;
 \tau(t) = \int_{0}^{t} f(\text{novelty-rate}, \text{prediction-error}, \text{engagement})\,du
-\quad d\tau/dt = f(\cdot)
+\quad \frac{d\tau}{dt} = f(\cdot)
 \;}$}\label{eq:tau}
 \end{equation}
 so that $d\tau/dt\approx 0$ on uneventful stretches and spikes on surprise \citep{schmidhuber1991curiosity}. A concrete instantiation is $f = \alpha\cdot\text{novelty-rate} + \beta\cdot\text{prediction-error} + \gamma\cdot\text{engagement}$ with $\alpha+\beta+\gamma=1$: novelty-rate as per-token mean negative log-probability against a rolling semantic cache (predictive surprise), prediction-error as the cosine distance in embedding space between predicted and observed event type, engagement as the goal-relevance salience $s$. $f$ is a configurable calibration parameter---any monotone estimator of compression-progress qualifies---and the store keeps the resulting $\tau$, not the estimator.
@@ -287,7 +287,7 @@ Compact reference index; each hypothesis is stated where it is used in the main 
 \item \textbf{H11--H13} --- A discontinuous inference core coupled to a continuous sensor substrate; change is marked witnessed-vs-reconstructed (D7).
 \item \textbf{H14} --- Gate-at-encoding: $d\tau/dt$ advances on surprise only; low-salience episodes never enter the store (D4).
 \item \textbf{H15} --- Resolution ladder: schema and episode details fuse at graded resolution (D4, D5).
-\item \textbf{H16} --- Escalation bursts temporarily hold the gate open on high-arousal triggers (H16).
+\item \textbf{H16} --- Escalation bursts temporarily hold the gate open on high-arousal triggers (D2).
 \item \textbf{H17--H18} --- Objects condense by prediction-error gating: schema-trace fusion + deferred significance promoting tiers (D4).
 \item \textbf{H-$\tau$} --- $\tau$-keyed decay outperforms wall-clock-keyed decay on quiet-vs-eventful equal-duration probes (D6; E1).
 \end{itemize}

@@ -42,7 +42,7 @@ The full schema assigns a type and index to every coordinate. \texttt{wall} \tex
 Subjective time is the central quantity, defined once and used throughout:
 \begin{equation}\resizebox{0.9\columnwidth}{!}{$\boxed{\;
 \tau(t) = \int_{0}^{t} f(\text{novelty-rate}, \text{prediction-error}, \text{engagement})\,du,
-\quad d\tau/dt = f(\cdot)
+\quad \frac{d\tau}{dt} = f(\cdot)
 \;}$}\label{eq:tau}
 \end{equation}
 so $d\tau/dt\approx 0$ on uneventful stretches and spikes on surprise \citep{schmidhuber1991curiosity}. A concrete instantiation is $f = \alpha\cdot\text{novelty-rate} + \beta\cdot\text{prediction-error} + \gamma\cdot\text{engagement}$ with $\alpha+\beta+\gamma=1$: novelty-rate as per-token mean negative log-probability against a rolling semantic cache, prediction-error as the cosine distance between predicted and observed event type, engagement as the goal-relevance salience $s$; $f$ is a configurable calibration parameter, and the store keeps the resulting $\tau$, not the estimator.

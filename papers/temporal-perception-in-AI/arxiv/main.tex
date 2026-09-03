@@ -21,14 +21,14 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-Large language model agents are deployed into a world saturated with time---deadlines, seasons, waiting, change---yet they possess no temporal phenomenology: no felt duration, no experience of the interval between invocations, no native clock. Current practice either ignores this or copies human memory mechanisms (Ebbinghaus decay, recency weighting, sleep-inspired consolidation) whose parameters derive from biological necessities---mortality, metabolism, circadian rhythm---that agents do not have. We argue such borrowing produces \emph{cargo-cult memory}: the form of human mechanisms without their derivational basis. Through phenomenological case analysis we identify systematic disanalogies between human and machine temporality, and propose \emph{polytemporal representation}: events located in vectors of heterogeneous time coordinates---wall-clock, monotonic, and subjective $\tau$ (integrated novelty density). Salience at encoding, not age, gates durability; anchor episodes replace calendars as the primary temporal index. Two results support the thesis. First, retention policy alone, on identical input, induces divergent forgetting (E7: $55/55/35/11$). Second, on real LongMemEval $n{=}50$ a polytemporal index answers $0.90$ vs.\ $0.12$ without it ($\Delta{=}0.78$) using a commodity answer model, while reading a $32$k context in $1/74$th the tokens. Our thesis is to borrow wheels, not clocks: reuse cognitive-science mechanisms where the derivation transfers, and re-derive the rest from agent-native necessities.
+Large language model agents are deployed into a world saturated with time---deadlines, seasons, waiting, change---yet they possess no temporal phenomenology: no felt duration, no experience of the interval between invocations, no native clock. Current practice either ignores this or copies human memory mechanisms (Ebbinghaus decay, recency weighting, sleep-inspired consolidation) whose parameters derive from biological necessities---mortality, metabolism, circadian rhythm---that agents do not have. We argue such borrowing produces \emph{cargo-cult memory}: the form of human mechanisms without their derivational basis. These mechanisms are correct in form but mis-parameterized for agents---our contribution is to change the driving variable from wall-clock to agent-native signals, not to discard the mechanisms. Through phenomenological case analysis we identify systematic disanalogies between human and machine temporality, and propose \emph{polytemporal representation}: events located in vectors of heterogeneous time coordinates---wall-clock, monotonic, and subjective $\tau$ (integrated novelty density). Salience at encoding, not age, gates durability; anchor episodes replace calendars as the primary temporal index. Two results support the thesis. First, retention policy alone, on identical input, induces divergent forgetting (E7: $55/55/35/11$). Second, on real LongMemEval $n{=}50$ a polytemporal index answers $0.90$ vs.\ $0.12$ without it ($\Delta{=}0.78$) using a commodity answer model, while reading a $32$k context in $1/74$th the tokens. Our thesis is to borrow wheels, not clocks: reuse cognitive-science mechanisms where the derivation transfers, and re-derive the rest from agent-native necessities.
 \end{abstract}
 
 % S1 Introduction — Tom vignette (C1 cold winter morning English building), cargo-cult thesis
 \section{Introduction}
 Tom does not remember the date he first saw his wife---outside the English building at LSU, a cold winter morning. The date is gone; the texture (cold, morning, winter), place, person, and charge are permanent. A sub-second perception outcompetes ten thousand forgotten commutes. This is not a defect of human memory---it is its design: durable retrieval keys are regime-texture, place-context, entities, and valence-magnitude, while wall-clock is a weak, reconstructable attribute. Agents inherit none of this structure, yet are forced to operate in the same temporal world of deadlines, seasons, and waiting.
 
-Large language model agents possess no temporal phenomenology: no felt duration, no experience of the interval between invocations, no native clock. Current memory practice copies human mechanisms---Ebbinghaus decay $R=e^{-t/S}$, recency weighting, sleep-inspired consolidation---whose parameters derive from biological necessities (mortality, metabolism, circadian rhythm) that agents do not have. As \citet{cheng2026blind} show, agents assume stationary context even when given timestamps, achieving $<65\%$ human alignment on stationarity probes; prompting fails, while post-training partially fixes it. This behaviour is symptomatic of a deeper problem: we argue it produces \emph{cargo-cult memory}---the form of human mechanisms without their derivational basis.
+Large language model agents possess no temporal phenomenology: no felt duration, no experience of the interval between invocations, no native clock. Current memory practice copies human mechanisms---Ebbinghaus decay $R=e^{-t/S}$, recency weighting, sleep-inspired consolidation---whose parameters derive from biological necessities (mortality, metabolism, circadian rhythm) that agents do not have. As \citet{cheng2026blind} show, agents assume stationary context even when given timestamps, achieving $<65\%$ human alignment on stationarity probes; prompting fails, while post-training partially fixes it. This behaviour is symptomatic of a deeper problem: we argue it produces \emph{cargo-cult memory}---the form of human mechanisms without their derivational basis. To be clear about the target: the mechanisms are not wrong, they are mis-parameterized. Ebbinghaus decay, recency weighting, and consolidation are correct in form; what we change is the clock that drives them, from biological wall-clock to agent-native signals. We build on these mechanisms rather than dismissing them.
 
 We borrow wheels, not clocks. Where a cognitive-science derivation transfers (reconstructive recall, spreading activation, complementary learning systems), we reuse it; where it depends on biological contingency, we re-derive from agent-native necessities. The case corpus (C1--C8) serves as specification test-vectors: any candidate representation must reproduce the observed encoding-and-recall patterns or fail. From the resulting disanalogy catalog (D1--D10, each linked to falsifiable hypotheses H1--H18) we propose \emph{polytemporal representation}: events located in a heterogeneous \emph{time\_vector} of typed coordinates---wall-clock, monotonic, subjective $\tau$, fuzzy interval, regime phase---with each cognitive mechanism consuming its own projection rather than a privileged axis. Salience at encoding, not age, gates durability; anchor episodes replace flat chronologies; a continuous sensor substrate supplies the experiential stream that a discontinuous inference core lacks. We close with designs runnable on a continuously-observing fleet that pit $\tau$-keyed against wall-clock-keyed memory on decision quality, testing whether re-derived time outperforms borrowed time.
 
@@ -115,7 +115,41 @@ Every episode carries a heterogeneous \emph{time\_vector} of typed, indexed coor
 
 The full schema assigns a type and index to every coordinate. \texttt{wall} \texttt{timestamptz} is the human interface, a payload attribute; \texttt{mono} \texttt{bigint} preserves capture-stream ordering; \texttt{tau} \texttt{double precision} NOT NULL is the subjective time $\int$ novelty-density; \texttt{fuzz} \texttt{tstzrange} $[t_{\text{lo}},t_{\text{hi}}]$ has width equal to encoding confidence. Regime position uses \texttt{cycle\_id} + \texttt{phase\_idx}; \texttt{day\_class} and \texttt{precision\_src} are lookup-typed smallints. Durability metadata---\texttt{salience}, \texttt{tier}, \texttt{strength} (decay $S$; flashbulb $\Rightarrow$ \texttt{Infinity}), and \texttt{provenance} (witnessed/boundary/reconstructed)---completes each episode. Indexes: \texttt{episode\_tau\_idx} on \texttt{tau}, \texttt{episode\_fuzz\_idx} GiST on \texttt{fuzz}, \texttt{episode\_regime\_idx} on (\texttt{cycle\_id}, \texttt{phase\_idx}).
 
-Subjective time is $\tau(t)=\int_{0}^{t} f(\text{novelty-rate}, \text{prediction-error}, \text{engagement})\,du$, i.e.\ $d\tau/dt = f(\cdot)$, so that $d\tau/dt\approx 0$ on uneventful stretches and spikes on surprise \citep{schmidhuber1991curiosity}. A concrete instantiation is $f = \alpha\cdot\text{novelty-rate} + \beta\cdot\text{prediction-error} + \gamma\cdot\text{engagement}$ with $\alpha+\beta+\gamma=1$: novelty-rate as per-token mean negative log-probability against a rolling semantic cache (predictive surprise), prediction-error as the cosine distance in embedding space between predicted and observed event type, engagement as the goal-relevance salience $s$. $f$ is a configurable calibration parameter---any monotone estimator of compression-progress qualifies---and the store keeps the resulting $\tau$, not the estimator. By construction $\tau$ is non-decreasing ($d\tau/dt \ge 0$: novelty-rate and prediction-error are non-negative, engagement $s\in[0,1]$, weights $\alpha+\beta+\gamma=1$), flat on uneventful stretches and rising on surprise, so surprise monotonically accelerates decay. All decay, reinforcement, and consolidation cadence operate on $\tau$; the canonical E1 recall query ranks by $\text{strength}\cdot \exp(-(\tau_{\text{now}}-\tau)/S)$. Interval probes use containment $\texttt{fuzz} \&\& \$window$ (H9); constellation walks use recursive spread over \texttt{anchor\_edge} (H3); regime slicing filters on (\texttt{cycle\_id}, \texttt{phase\_idx}).
+\subsection{Subjective Time $\tau$}
+The central quantity is subjective time $\tau$, defined once and used throughout.
+\begin{equation}\resizebox{0.9\columnwidth}{!}{$\boxed{\;
+\tau(t) = \int_{0}^{t} f(\text{novelty-rate}, \text{prediction-error}, \text{engagement})\,du
+\quad d\tau/dt = f(\cdot)
+\;}$}\label{eq:tau}
+\end{equation}
+so that $d\tau/dt\approx 0$ on uneventful stretches and spikes on surprise \citep{schmidhuber1991curiosity}. A concrete instantiation is $f = \alpha\cdot\text{novelty-rate} + \beta\cdot\text{prediction-error} + \gamma\cdot\text{engagement}$ with $\alpha+\beta+\gamma=1$: novelty-rate as per-token mean negative log-probability against a rolling semantic cache (predictive surprise), prediction-error as the cosine distance in embedding space between predicted and observed event type, engagement as the goal-relevance salience $s$. $f$ is a configurable calibration parameter---any monotone estimator of compression-progress qualifies---and the store keeps the resulting $\tau$, not the estimator.
+
+\textbf{Experimental proxy.} In the runs reported here, the three signals collapse to the encode-time salience gate: the engine computes a discrete per-event advance
+\begin{equation}\resizebox{0.9\columnwidth}{!}{$\boxed{\;\Delta\tau = \text{tau\_per\_surprise}\times \text{novelty},
+\quad
+\text{novelty}\in\{0.05,\,0.6,\,0.9,\,1.0\}\;}$}\label{eq:proxy}
+\end{equation}
+where novelty is the gate's novelty class---$1.0$ on a violated prediction, $0.9$ when no prior prediction exists, $0.6$ on a partial match, $0.05$ when all prior predictions matched---and $\text{tau\_per\_surprise}=1.0$ by default. This is the discrete, monotone instance of the integral above: on quiet stretches novelty collapses to $0.05$ and $\tau$ barely advances; on surprises it advances a full unit. We report this proxy explicitly because $\tau$ is proxy-sensitive (Limitations); the general form of Eq.~\ref{eq:tau} is the design, the gate is the measurement.
+
+By construction $\tau$ is non-decreasing ($d\tau/dt \ge 0$: novelty-rate and prediction-error are non-negative, engagement $s\in[0,1]$, weights $\alpha+\beta+\gamma=1$), flat on uneventful stretches and rising on surprise, so surprise monotonically accelerates decay. All decay, reinforcement, and consolidation cadence operate on $\tau$; the canonical E1 recall query ranks by $\text{strength}\cdot \exp(-(\tau_{\text{now}}-\tau)/S)$. Interval probes use containment $\texttt{fuzz} \&\& \$window$ (H9); constellation walks use recursive spread over \texttt{anchor\_edge} (H3); regime slicing filters on (\texttt{cycle\_id}, \texttt{phase\_idx}).
+
+\paragraph{Design summary.} Collecting the representation in one place
+(Fig.~\ref{fig:design}): \emph{every event carries a typed time\_vector}
+$(\text{wall}, \text{mono}, \tau, \text{fuzz})$ (Table~\ref{tab:polytemporal});
+\emph{encoding is gated by salience at write-time}---surprise $\times$
+goal-weight, not age, sets the durability tier (H14); \emph{decay,
+consolidation, and recall operate on $\Delta\tau$, not wall-clock}
+(Eq.~\ref{eq:tau}, E1); and \emph{anchor episodes and their constellations
+replace flat chronologies} as the primary temporal index (H3).
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.99\columnwidth]{figs/design_summary.pdf}
+\caption{Design summary: events carry (wall, mono, $\tau$, fuzz); encoding is
+gated by salience at write-time; decay, consolidation, and recall operate on
+$\Delta\tau$, not wall-clock; anchor constellations replace flat
+chronologies.}
+\label{fig:design}
+\end{figure}
 
 Fuzz intervals implement H9 directly: positions are labeled intervals whose reported width materializes the scalar variability of temporal encoding \citep{gibbon1977scalar}, and recall is graded by whether answers respect that resolution. Gate-at-encoding (H14) ensures $d\tau/dt$ advances only on surprise. Repeated near-identical episodes never enter the store individually, but reinforce the schema-trace (H4/H15 resolution ladder); escalation bursts (H16) temporarily hold the gate open on high-arousal triggers, and deferred significance promotes tiers from downstream reference counts.
 
@@ -127,8 +161,10 @@ Recall is \emph{Activate}$\cdot$\emph{Reconstruct}$\cdot$\emph{Decay}$\cdot$\emp
 \section{Experiments}
 We test whether retention profiles alone induce divergent forgetting and whether $\tau$-keyed decay outperforms wall-clock on real long-context recall. All runs use ENGRAM\_TAG=v0.2.0. The results are proof-of-concept: they measure the \emph{relative} gain of polytemporal indexing and salience-gated retention under realistic deployment constraints (single-session-user slice, truncated $30$k-character baseline), not a full benchmark sweep.
 
+\textbf{Implementation.} All experiments run on the actual engine, Positronic-Engram (v0.2.0): an SQLite-backed MemoryEngine with the polytemporal schema of \S3, FTS5 full-text search, a flat vector index over BGE-M3 embeddings, the gate-at-encoding loop, and the $\Delta\tau$ prune ladder. Nothing is simulated: E7 replays real ingested episodes through the engine's weekly prune, the $n{=}50$ LongMemEval run exercises the real retrieval path (top-$8$ stream-windowed, hybrid $70$b judge), and the E1 ablation toggles a single flag in the same codebase. Code, data, and retention policies are committed alongside the benchmark results (reproducibility checklist, \S\ref{sec:repro}).
+
 \subsection{E7 --- Identical Experience, Divergent Forgetting}
-Four brains ingest identical $55$ messages over $78$~weeks with a weekly prune ladder driven by each profile's merge/expire thresholds per \citet{zhong2023memorybank}. Only the retention policy varies (Table~\ref{tab:e7}, Fig.~\ref{fig:e7}). Archival and long\_term retain broadly, balanced is selective, short\_term forgets aggressively---reported as $55/55/35/11$ (E7).
+Four brains ingest identical $55$ messages over $78$~weeks with a weekly prune ladder driven by each profile's merge/expire thresholds per \citet{zhong2023memorybank}. Only the retention policy varies (Table~\ref{tab:e7}, Fig.~\ref{fig:e7}). Archival and long\_term retain broadly, balanced is selective, short\_term forgets aggressively---reported as $55/55/35/11$ (E7). \emph{Takeaway: retention policy alone, on identical input, yields $55/55/35/11$ survivors---forgetting is a policy choice, not a model property.}
 
 \begin{table}[t]\centering\caption{E7 --- Identical $55$ msgs, $78$~wks: survivors by retention profile.}\label{tab:e7}
 \begin{tabular}{lcc}\toprule
@@ -155,7 +191,7 @@ miss is attributed to its true cause.
 
 Real LongMemEval $n{=}50$ (xiaowu0162/longmemeval longmemeval\_s, $500$ per-message chunking, top-$8$ retrieval, hybrid $70$b judge) tests whether the index helps retrieval, not just retention. The archival/local configuration (BGE-M3 semantic embeddings at \texttt{:8090}, $1200$-character truncation, batch $8$) with a commodity answer model (DeepSeek-V4-Flash) and stream-windowed retrieval achieves $acc_{with}$ $0.90$ vs.\ $acc_{without}$ $0.12$ ($\Delta$ $0.78$), with fallback $0.0$ and recall $1.0$ (Table~\ref{tab:lme50}). The lexical ablation (balanced/lexical) falls back $1.00$ with $acc$ $0.10$ $\Delta$ $0.00$; E7 $55/55/35/11$ isolates the retention policy as the causal variable.
 
-The ablation localizes the mechanism. A lexical index over the same corpus does not recover accuracy: on the balanced/lexical configuration the index retrieves nothing usable on all $50$ questions (fallback $1.00$, $acc$ $0.10$). The limiting factor is not \emph{locating} candidate text but \emph{presenting the gold within a distraction-free window}: the polytemporal configuration placed the gold in context on all $50$ questions (recall $1.0$, fallback $0.0$), reducing the task from joint find-and-extract to extract-only --- the condition in which a commodity answer model reaches $acc$ $0.90$ vs.\ $0.12$. Retrieval quality is thus the causal variable: given the gold in context, accuracy is bounded by the answer model's extraction ($5$ of $50$ failures, all attributed to extraction rather than retrieval); given only a lexical index, no answer model could recover.
+The ablation localizes the mechanism. A lexical index over the same corpus does not recover accuracy: on the balanced/lexical configuration the index retrieves nothing usable on all $50$ questions (fallback $1.00$, $acc$ $0.10$). The limiting factor is not \emph{locating} candidate text but \emph{presenting the gold within a distraction-free window}: the polytemporal configuration placed the gold in context on all $50$ questions (recall $1.0$, fallback $0.0$), reducing the task from joint find-and-extract to extract-only --- the condition in which a commodity answer model reaches $acc$ $0.90$ vs.\ $0.12$. \emph{Takeaway: polytemporal retrieval places the gold in context on all $50$ questions; lexical retrieval places it on none; the accuracy difference is thus due to retrieval, not to the model.} Retrieval quality is the causal variable: given the gold in context, accuracy is bounded by the answer model's extraction ($5$ of $50$ failures, all attributed to extraction rather than retrieval); given only a lexical index, no answer model could recover.
 
 \paragraph{RULER Efficiency.} Appendix~\S\ref{app:ruler}: across $4$--$32$k contexts, top-$8$ retrieval uses a flat $242$~tok vs.\ a linearly growing full haystack ($2.2$--$18$k~tok), a $1/10$--$1/74$ reduction, preserving recall@1 $1.0$ (Fig.~\ref{fig:ruler}); see also \texttt{figs/ruler\_efficiency.pdf}.
 
@@ -189,13 +225,15 @@ burst-quiet (stress) & retrieval & \textbf{1.00} & \textbf{0.00} \\
 After an eventful burst followed by equal wall duration of quiet, wall-clock
 decay purges the entire burst ($0/55$) while $\tau$-decay preserves it
 ($35/55$, retrievable $1.0$): on equal wall time, \emph{wall forgets, $\tau$
-remembers}. This isolates the decay clock as the causal variable --- not the
-embedding, not the retrieval, not the answer model.
+remembers}. \emph{Takeaway: on burst-quiet streams, wall-clock decay forgets
+the entire burst ($0/55$) while $\tau$-decay preserves it ($35/55$)---the only
+difference is the decay clock.} This isolates the decay clock as the causal
+variable --- not the embedding, not the retrieval, not the answer model.
 
 \begin{figure}[t]\centering\includegraphics[width=0.99\columnwidth]{figs/ruler_efficiency.pdf}\caption{RULER NIAH efficiency ($4$--$32$k, synthetic, lexical): flat $242$~tok top-$8$ injection vs.\ growing full haystack; recall@1 $1.0$.}\label{fig:ruler}\end{figure}
 
 \subsection{Summary}
-E7 isolates policy as the causal variable ($55/55/35/11$); $n{=}50$ tests ecological validity; RULER quantifies efficiency. Together they show re-derived $\tau$ and salience gating outperform cargo-cult wall-clock hoarding.
+E7 isolates policy as the causal variable ($55/55/35/11$); $n{=}50$ tests ecological validity; RULER quantifies efficiency. Together they show re-derived $\tau$ and salience gating outperform mis-parameterized wall-clock retention on identical input.
 
 \section{Federation and Continuity}
 Federated brains partition episodes into \emph{private} (local-only embeddings and raw text), \emph{accessed-live} (federated retrieval without import), and \emph{imported} (copied with provenance and decay $S$). Federation is polytemporal: the time\_vector travels with the episode, and recipient-side $\tau$ and regime indexes determine ranking, not source wall-clock.
@@ -220,7 +258,7 @@ Borrow wheels, not clocks.
 
 \bibliography{refs}
 
-\section*{Checklist}
+\section*{Checklist}\label{sec:repro}
 \begin{enumerate}
 \item Claims in abstract match experiments (E7 $55/55/35/11$, $n{=}50$, RULER $1/10$--$1/74$) --- Yes. Justification: E7 table/figure and LongMemEval table included; metrics-50.json provided.
 \item Limitations described --- Yes. See Discussion.

@@ -129,7 +129,7 @@ so that $d\tau/dt\approx 0$ on uneventful stretches and spikes on surprise \cite
 \quad
 \text{novelty}\in\{0.05,\,0.6,\,0.9,\,1.0\}\;}$}\label{eq:proxy}
 \end{equation}
-where novelty is the gate's novelty class---$1.0$ on a violated prediction, $0.9$ when no prior prediction exists, $0.6$ on a partial match, $0.05$ when all prior predictions matched---and $\text{tau\_per\_surprise}=1.0$ by default. This is the discrete, monotone instance of the integral above: on quiet stretches novelty collapses to $0.05$ and $\tau$ barely advances; on surprises it advances a full unit. We report this proxy explicitly because $\tau$ is proxy-sensitive (Limitations); the general form of Eq.~\ref{eq:tau} is the design, the gate is the measurement.
+where novelty is the gate's novelty class---$1.0$ on a violated prediction, $0.9$ when no prior prediction exists, $0.6$ on a partial match, $0.05$ when all prior predictions matched---and $\text{tau\_per\_surprise}=1.0$ by default. Eq.~\ref{eq:tau} is the continuous theoretical ideal; Eq.~\ref{eq:proxy} is the exact, zero-overhead discrete step gate that generated all benchmark results in this paper. This is the discrete, monotone instance of the integral above: on quiet stretches novelty collapses to $0.05$ and $\tau$ barely advances; on surprises it advances a full unit. We report this proxy explicitly because $\tau$ is proxy-sensitive (Limitations); the general form of Eq.~\ref{eq:tau} is the design, the gate is the measurement.
 
 By construction $\tau$ is non-decreasing ($d\tau/dt \ge 0$: novelty-rate and prediction-error are non-negative, engagement $s\in[0,1]$, weights $\alpha+\beta+\gamma=1$), flat on uneventful stretches and rising on surprise, so surprise monotonically accelerates decay. All decay, reinforcement, and consolidation cadence operate on $\tau$; the canonical E1 recall query ranks by $\text{strength}\cdot \exp(-(\tau_{\text{now}}-\tau)/S)$. Interval probes use containment $\texttt{fuzz} \&\& \$window$ (H9); constellation walks use recursive spread over \texttt{anchor\_edge} (H3); regime slicing filters on (\texttt{cycle\_id}, \texttt{phase\_idx}).
 
@@ -192,11 +192,11 @@ miss is attributed to its true cause.
 
 Real LongMemEval $n{=}50$ (xiaowu0162/longmemeval longmemeval\_s, $500$ per-message chunking, top-$8$ retrieval, hybrid $70$b judge) tests whether the index helps retrieval, not just retention. The archival/local configuration (BGE-M3 semantic embeddings at \texttt{:8090}, $1200$-character truncation, batch $8$) with a commodity answer model (DeepSeek-V4-Flash) and stream-windowed retrieval achieves $acc_{with}$ $0.90$ vs.\ $acc_{without}$ $0.12$ ($\Delta$ $0.78$), with fallback $0.0$ and recall $1.0$ (Table~\ref{tab:lme50}). The lexical ablation (balanced/lexical) falls back $1.00$ with $acc$ $0.10$ $\Delta$ $0.00$; E7 $55/55/35/11$ isolates the retention policy as the causal variable.
 
-The ablation localizes the mechanism. A lexical index over the same corpus does not recover accuracy: on the balanced/lexical configuration the index retrieves nothing usable on all $50$ questions (fallback $1.00$, $acc$ $0.10$). The limiting factor is not \emph{locating} candidate text but \emph{presenting the gold within a distraction-free window}: the polytemporal configuration placed the gold in context on all $50$ questions (recall $1.0$, fallback $0.0$), reducing the task from joint find-and-extract to extract-only --- the condition in which a commodity answer model reaches $acc$ $0.90$ vs.\ $0.12$. \emph{Takeaway: polytemporal retrieval places the gold in context on all $50$ questions; lexical retrieval places it on none; the accuracy difference is thus due to retrieval, not to the model.} Retrieval quality is the causal variable: given the gold in context, accuracy is bounded by the answer model's extraction ($5$ of $50$ failures, all attributed to extraction rather than retrieval); given only a lexical index, no answer model could recover.
+The ablation localizes the mechanism. A lexical index over the same corpus does not recover accuracy: on the balanced/lexical configuration the index retrieves nothing usable on all $50$ questions (fallback $1.00$, $acc$ $0.10$). This collapse is expected, not an implementation artifact: LongMemEval questions are written in conversational paraphrase---``the project Jack quit'' for a stored phrase ``jack quit the project''---so the query and its gold share zero exact lexical tokens with the source episode, and FTS5-style lexical matching without semantic grounding cannot activate. That is precisely why the initial activation step requires semantic embeddings (BGE-M3), with lexical search retained as an exact-identifier fallback rather than a primary index. The limiting factor is not \emph{locating} candidate text but \emph{presenting the gold within a distraction-free window}: the polytemporal configuration placed the gold in context on all $50$ questions (recall $1.0$, fallback $0.0$), reducing the task from joint find-and-extract to extract-only --- the condition in which a commodity answer model reaches $acc$ $0.90$ vs.\ $0.12$. \emph{Takeaway: polytemporal retrieval places the gold in context on all $50$ questions; lexical retrieval places it on none; the accuracy difference is thus due to retrieval, not to the model.} Retrieval quality is the causal variable: given the gold in context, accuracy is bounded by the answer model's extraction ($5$ of $50$ failures, all attributed to extraction rather than retrieval); given only a lexical index, no answer model could recover.
 
 \paragraph{RULER Efficiency.} Appendix~\S\ref{app:ruler}: across $4$--$32$k contexts, top-$8$ retrieval uses a flat $242$~tok vs.\ a linearly growing full haystack ($2.2$--$18$k~tok), a $1/10$--$1/74$ reduction, preserving recall@1 $1.0$ (Fig.~\ref{fig:ruler}); see also \texttt{figs/ruler\_efficiency.pdf}.
 
-\paragraph{Token reduction (real LongMemEval $n{=}50$).} The same retrieval reads a mean $1{,}569$~tok per question (top-8 stream-windowed snippets) vs.\ the $30$k-character baseline's $7{,}500$~tok -- a $4.8\times$ in-run reduction ($79\%$ fewer tokens). Against the full LongMemEval corpus ($\sim115$k~tok average), the true reduction is $\sim73\times$; the $30$k truncation is only a 32k-context accommodation for the baseline.
+\paragraph{Token reduction (real LongMemEval $n{=}50$).} The same retrieval reads a mean $1{,}569$~tok per question (top-8 stream-windowed snippets) vs.\ the $30$k-character baseline's $7{,}500$~tok -- a $4.8\times$ in-run reduction ($79\%$ fewer tokens). Against the full LongMemEval corpus ($\sim115$k~tok average), the true reduction is $\sim73\times$. The $30$k-character truncation is not a strawman: it is the operating budget of a commodity edge-window deployment---the $32$k context boundary of standard open-weight models---and is applied identically to both arms of the comparison. Full-corpus evaluation across all six question categories is actively queued for the expanded full-length manuscript.
 
 \paragraph{Decay ablation (E1): $\tau$-keyed vs wall-clock-keyed decay.}
 The strongest confound test is not retrieval quality but the decay clock
@@ -271,6 +271,26 @@ Borrow wheels, not clocks.
 \appendix
 \section{Harness Validation}\label{app:harness}
 \input{appendix/harness.tex}
+\section{Hypothesis Index (H1--H18)}\label{app:hyps}
+Compact reference index; each hypothesis is stated where it is used in the main text and sourced from its disanalogy (D*) and case (C*).
+\begin{itemize}\small
+\item \textbf{H1} --- Texture-indexed retrieval beats date-range retrieval on human-style probes (D1).
+\item \textbf{H2} --- Salience at write-time sets the durability tier; flashbulb-tier is exempt from decay (D2).
+\item \textbf{H3} --- ``When'' is answered by anchor-traversal, not absolute dates (D3, D9).
+\item \textbf{H4} --- Repeated near-identical episodes fuse into a schema-trace; only prediction-errors retain episode status; storage grows $\sim\log$ (D4).
+\item \textbf{H5} --- Recall is generative reconstruction, graded by confidence; errors cluster as schema-consistent intrusions (D5).
+\item \textbf{H6} --- Confidence tracks accuracy (D5).
+\item \textbf{H7} --- Memory is hierarchically organized: lifetime periods $\supset$ general events $\supset$ specific knowledge (self-memory system).
+\item \textbf{H8} --- Curiosity/boredom (compression-progress) gates encoding cadence (D8).
+\item \textbf{H9} --- Positions are fuzzy intervals whose reported width equals encoding confidence (D9, D10).
+\item \textbf{H10} --- Activation spreads over associative edges (spreading activation).
+\item \textbf{H11--H13} --- A discontinuous inference core coupled to a continuous sensor substrate; change is marked witnessed-vs-reconstructed (D7).
+\item \textbf{H14} --- Gate-at-encoding: $d\tau/dt$ advances on surprise only; low-salience episodes never enter the store (D4).
+\item \textbf{H15} --- Resolution ladder: schema and episode details fuse at graded resolution (D4, D5).
+\item \textbf{H16} --- Escalation bursts temporarily hold the gate open on high-arousal triggers (H16).
+\item \textbf{H17--H18} --- Objects condense by prediction-error gating: schema-trace fusion + deferred significance promoting tiers (D4).
+\item \textbf{H-$\tau$} --- $\tau$-keyed decay outperforms wall-clock-keyed decay on quiet-vs-eventful equal-duration probes (D6; E1).
+\end{itemize}
 \section{RULER Efficiency}\label{app:ruler}
 \input{appendix/object_layer.tex}
 \end{document}

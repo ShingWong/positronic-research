@@ -22,6 +22,8 @@ author:
 
 normative:
   RFC2119:
+  RFC8174:
+  RFC3339:
 
 informative:
   PEEP-0002:
@@ -65,6 +67,11 @@ The contract is built on four design principles:
 
 # Terminology
 
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
+"SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be
+interpreted as described in {{RFC2119}} and {{RFC8174}} (which clarifies that
+these key words only carry normative weight when written in full uppercase).
+
 | term | meaning |
 |---|---|
 | **producer** | a memory engine that emits PEEP payloads |
@@ -86,14 +93,14 @@ containing the following fields:
 | field | type | requirement | meaning |
 |---|---|---|---|
 | `episode_id` | string | MUST | stable unique identifier of the episode |
-| `tau` | number | MUST | subjective time coordinate; MUST NOT be null |
-| `wall` | string | MUST | ISO-8601 wall-clock timestamp; MUST be a string |
+| `tau` | number | MUST | subjective time coordinate (IEEE 754 double); MUST NOT be null |
+| `wall` | string | MUST | timestamp formatted according to {{RFC3339}}; MUST be a string |
 | `stream` | string | SHOULD | the source stream identifier |
-| `kind` | string | MUST | one of `message`, `consolidation` (extensible) |
+| `kind` | string | MUST | entity kind; standard values are `message` and `consolidation`; implementation-defined values MUST be prefixed with `x-` |
 | `salience` | number | MUST | encoding salience in [0,1] |
 | `snippet` | string | SHOULD | the retrieved text |
-| `fuzz_lo` | string or null | MAY | fuzzy lower interval bound |
-| `fuzz_hi` | string or null | MAY | fuzzy upper interval bound |
+| `fuzz_lo` | string or null | MAY | lower interval bound formatted according to {{RFC3339}} |
+| `fuzz_hi` | string or null | MAY | upper interval bound formatted according to {{RFC3339}} |
 | `provenance` | string | SHOULD | one of `witnessed`, `reconstructed` |
 | `person_boost` | number | MAY | person-weighting applied at retrieval |
 | `fallback` | boolean | MUST | true if the hit came from the fallback channel |
@@ -158,8 +165,11 @@ treat `latest_consolidation` as the whole truth.
 A dossier is the full tau-ordered list of every sighting of an object. Each
 sighting MUST include an `episode_id`, `tau`, `wall`, and `kind`; MAY include
 `subject_norm`, `body_text`, `channel`, and `confidence`. The list MUST be
-ordered by tau (ascending or descending; a consumer MUST NOT assume a
-direction without inspecting two adjacent tau values).
+ordered by `tau` **ascending** (oldest to newest, i.e. chronological order of
+subjective time). Producers MUST NOT emit a descending or mixed order; a
+consumer MUST be able to assume ascending order without inspecting adjacent
+values. This removes any ambiguity for single-sighting dossiers or sightings
+sharing an identical `tau`.
 
 Normative example:
 
@@ -178,7 +188,7 @@ Normative example:
 | Level | content | access |
 |---|---|---|
 | PEEP Level 1 | recall hit + entity digest + dossier structure (this RFC) | free, standard |
-| PEEP Level 2+ | full n=500 autopsies, fresh-model fingerprints, private runs | private, per agreement |
+| PEEP Level 2+ | extended temporal autopsies, model fingerprinting, and dense diagnostic vectors (reserved for future specifications) | future specification |
 
 # Security Considerations
 

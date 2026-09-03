@@ -73,7 +73,7 @@ Table of Contents
    7.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   8
    8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   8
      8.1.  Normative References  . . . . . . . . . . . . . . . . . .   8
-     8.2.  Informative References  . . . . . . . . . . . . . . . . .   8
+     8.2.  Informative References  . . . . . . . . . . . . . . . . .   9
    Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   9
 
 1.  Introduction
@@ -116,6 +116,12 @@ Internet-Draft                    PEEP                    September 2026
 
 2.  Terminology
 
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in [RFC2119] and
+   [RFC8174] (which clarifies that these key words only carry normative
+   weight when written in full uppercase).
+
      +============+=================================================+
      | term       | meaning                                         |
      +============+=================================================+
@@ -149,19 +155,13 @@ Internet-Draft                    PEEP                    September 2026
    A recall operation returns zero or more hits.  Each hit MUST be a
    JSON object containing the following fields:
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+     +==============+=========+=============+========================+
+     | field        | type    | requirement | meaning                |
+     +==============+=========+=============+========================+
+     | episode_id   | string  | MUST        | stable unique          |
+     |              |         |             | identifier of the      |
+     |              |         |             | episode                |
+     +--------------+---------+-------------+------------------------+
 
 
 
@@ -170,53 +170,53 @@ Wong                      Expires 6 March 2027                  [Page 3]
 Internet-Draft                    PEEP                    September 2026
 
 
-    +==============+=========+=============+==========================+
-    | field        | type    | requirement | meaning                  |
-    +==============+=========+=============+==========================+
-    | episode_id   | string  | MUST        | stable unique identifier |
-    |              |         |             | of the episode           |
-    +--------------+---------+-------------+--------------------------+
-    | tau          | number  | MUST        | subjective time          |
-    |              |         |             | coordinate; MUST NOT be  |
-    |              |         |             | null                     |
-    +--------------+---------+-------------+--------------------------+
-    | wall         | string  | MUST        | ISO-8601 wall-clock      |
-    |              |         |             | timestamp; MUST be a     |
-    |              |         |             | string                   |
-    +--------------+---------+-------------+--------------------------+
-    | stream       | string  | SHOULD      | the source stream        |
-    |              |         |             | identifier               |
-    +--------------+---------+-------------+--------------------------+
-    | kind         | string  | MUST        | one of message,          |
-    |              |         |             | consolidation            |
-    |              |         |             | (extensible)             |
-    +--------------+---------+-------------+--------------------------+
-    | salience     | number  | MUST        | encoding salience in     |
-    |              |         |             | [0,1]                    |
-    +--------------+---------+-------------+--------------------------+
-    | snippet      | string  | SHOULD      | the retrieved text       |
-    +--------------+---------+-------------+--------------------------+
-    | fuzz_lo      | string  | MAY         | fuzzy lower interval     |
-    |              | or null |             | bound                    |
-    +--------------+---------+-------------+--------------------------+
-    | fuzz_hi      | string  | MAY         | fuzzy upper interval     |
-    |              | or null |             | bound                    |
-    +--------------+---------+-------------+--------------------------+
-    | provenance   | string  | SHOULD      | one of witnessed,        |
-    |              |         |             | reconstructed            |
-    +--------------+---------+-------------+--------------------------+
-    | person_boost | number  | MAY         | person-weighting applied |
-    |              |         |             | at retrieval             |
-    +--------------+---------+-------------+--------------------------+
-    | fallback     | boolean | MUST        | true if the hit came     |
-    |              |         |             | from the fallback        |
-    |              |         |             | channel                  |
-    +--------------+---------+-------------+--------------------------+
+     | tau          | number  | MUST        | subjective time        |
+     |              |         |             | coordinate (IEEE 754   |
+     |              |         |             | double); MUST NOT be   |
+     |              |         |             | null                   |
+     +--------------+---------+-------------+------------------------+
+     | wall         | string  | MUST        | timestamp formatted    |
+     |              |         |             | according to           |
+     |              |         |             | [RFC3339]; MUST be a   |
+     |              |         |             | string                 |
+     +--------------+---------+-------------+------------------------+
+     | stream       | string  | SHOULD      | the source stream      |
+     |              |         |             | identifier             |
+     +--------------+---------+-------------+------------------------+
+     | kind         | string  | MUST        | entity kind; standard  |
+     |              |         |             | values are message and |
+     |              |         |             | consolidation;         |
+     |              |         |             | implementation-defined |
+     |              |         |             | values MUST be         |
+     |              |         |             | prefixed with x-       |
+     +--------------+---------+-------------+------------------------+
+     | salience     | number  | MUST        | encoding salience in   |
+     |              |         |             | [0,1]                  |
+     +--------------+---------+-------------+------------------------+
+     | snippet      | string  | SHOULD      | the retrieved text     |
+     +--------------+---------+-------------+------------------------+
+     | fuzz_lo      | string  | MAY         | lower interval bound   |
+     |              | or null |             | formatted according to |
+     |              |         |             | [RFC3339]              |
+     +--------------+---------+-------------+------------------------+
+     | fuzz_hi      | string  | MAY         | upper interval bound   |
+     |              | or null |             | formatted according to |
+     |              |         |             | [RFC3339]              |
+     +--------------+---------+-------------+------------------------+
+     | provenance   | string  | SHOULD      | one of witnessed,      |
+     |              |         |             | reconstructed          |
+     +--------------+---------+-------------+------------------------+
+     | person_boost | number  | MAY         | person-weighting       |
+     |              |         |             | applied at retrieval   |
+     +--------------+---------+-------------+------------------------+
+     | fallback     | boolean | MUST        | true if the hit came   |
+     |              |         |             | from the fallback      |
+     |              |         |             | channel                |
+     +--------------+---------+-------------+------------------------+
 
                                   Table 2
 
    Normative example:
-
 
 
 
@@ -348,9 +348,12 @@ Internet-Draft                    PEEP                    September 2026
    A dossier is the full tau-ordered list of every sighting of an
    object.  Each sighting MUST include an episode_id, tau, wall, and
    kind; MAY include subject_norm, body_text, channel, and confidence.
-   The list MUST be ordered by tau (ascending or descending; a consumer
-   MUST NOT assume a direction without inspecting two adjacent tau
-   values).
+   The list MUST be ordered by tau *ascending* (oldest to newest, i.e.
+   chronological order of subjective time).  Producers MUST NOT emit a
+   descending or mixed order; a consumer MUST be able to assume
+   ascending order without inspecting adjacent values.  This removes any
+   ambiguity for single-sighting dossiers or sightings sharing an
+   identical tau.
 
    Normative example:
 
@@ -364,28 +367,25 @@ Internet-Draft                    PEEP                    September 2026
 
 3.4.  Level semantics
 
-    +==============+==================================+==============+
-    | Level        | content                          | access       |
-    +==============+==================================+==============+
-    | PEEP Level 1 | recall hit + entity digest +     | free,        |
-    |              | dossier structure (this RFC)     | standard     |
-    +--------------+----------------------------------+--------------+
-    | PEEP Level   | full n=500 autopsies, fresh-     | private, per |
-    | 2+           | model fingerprints, private runs | agreement    |
-    +--------------+----------------------------------+--------------+
+        +=======+=================================+===============+
+        | Level | content                         | access        |
+        +=======+=================================+===============+
+        | PEEP  | recall hit + entity digest +    | free,         |
+        | Level | dossier structure (this RFC)    | standard      |
+        | 1     |                                 |               |
+        +-------+---------------------------------+---------------+
+        | PEEP  | extended temporal autopsies,    | future        |
+        | Level | model fingerprinting, and dense | specification |
+        | 2+    | diagnostic vectors (reserved    |               |
+        |       | for future specifications)      |               |
+        +-------+---------------------------------+---------------+
 
-                                 Table 4
+                                  Table 4
 
 4.  Security Considerations
 
    *  Payloads are data, not code.  Consumers MUST NOT evaluate any
       field as an expression or query language.
-
-   *  snippet, body_text, and latest_consolidation may contain arbitrary
-      user text.  Consumers MUST treat them as untrusted data
-      (rendering, logging, or echoing verbatim can leak PII).
-
-
 
 
 
@@ -393,6 +393,10 @@ Wong                      Expires 6 March 2027                  [Page 7]
 
 Internet-Draft                    PEEP                    September 2026
 
+
+   *  snippet, body_text, and latest_consolidation may contain arbitrary
+      user text.  Consumers MUST treat them as untrusted data
+      (rendering, logging, or echoing verbatim can leak PII).
 
    *  Producers MAY redact or omit body_text for privacy tiers; the
       contract is satisfied by the mandatory fields only.
@@ -436,12 +440,8 @@ Internet-Draft                    PEEP                    September 2026
 
 8.1.  Normative References
 
-   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-              Requirement Levels", BCP 14, RFC 2119,
-              DOI 10.17487/RFC2119, March 1997,
-              <https://www.rfc-editor.org/rfc/rfc2119>.
 
-8.2.  Informative References
+
 
 
 
@@ -449,6 +449,21 @@ Wong                      Expires 6 March 2027                  [Page 8]
 
 Internet-Draft                    PEEP                    September 2026
 
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC3339]  Klyne, G. and C. Newman, "Date and Time on the Internet:
+              Timestamps", RFC 3339, DOI 10.17487/RFC3339, July 2002,
+              <https://www.rfc-editor.org/rfc/rfc3339>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
+
+8.2.  Informative References
 
    [PEEP-0002]
               Wong, S., "Positronic Engram Exchange Protocol: HTTP
@@ -459,21 +474,6 @@ Author's Address
    Shing Wong
    Positron
    Email: swong@stuartconsultinggroup.com
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

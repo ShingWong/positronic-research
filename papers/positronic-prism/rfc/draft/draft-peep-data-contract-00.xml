@@ -32,7 +32,7 @@
     <abstract>
 
 
-<?line 36?>
+<?line 38?>
 
 <t>PEEP (Positronic Engram Exchange Protocol) defines the structure of the
 polytemporal data a memory engine delivers to a reasoning agent. This
@@ -52,7 +52,7 @@ from the payload alone (see Section 5).</t>
   <middle>
 
 
-<?line 45?>
+<?line 47?>
 
 <section anchor="introduction"><name>Introduction</name>
 
@@ -77,6 +77,11 @@ alone.</t>
 
 </section>
 <section anchor="terminology"><name>Terminology</name>
+
+<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
+"SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be
+interpreted as described in <xref target="RFC2119"/> and <xref target="RFC8174"/> (which clarifies that
+these key words only carry normative weight when written in full uppercase).</t>
 
 <texttable>
       <ttcol align='left'>term</ttcol>
@@ -119,11 +124,11 @@ containing the following fields:</t>
       <c><spanx style="verb">tau</spanx></c>
       <c>number</c>
       <c>MUST</c>
-      <c>subjective time coordinate; MUST NOT be null</c>
+      <c>subjective time coordinate (IEEE 754 double); MUST NOT be null</c>
       <c><spanx style="verb">wall</spanx></c>
       <c>string</c>
       <c>MUST</c>
-      <c>ISO-8601 wall-clock timestamp; MUST be a string</c>
+      <c>timestamp formatted according to <xref target="RFC3339"/>; MUST be a string</c>
       <c><spanx style="verb">stream</spanx></c>
       <c>string</c>
       <c>SHOULD</c>
@@ -131,7 +136,7 @@ containing the following fields:</t>
       <c><spanx style="verb">kind</spanx></c>
       <c>string</c>
       <c>MUST</c>
-      <c>one of <spanx style="verb">message</spanx>, <spanx style="verb">consolidation</spanx> (extensible)</c>
+      <c>entity kind; standard values are <spanx style="verb">message</spanx> and <spanx style="verb">consolidation</spanx>; implementation-defined values MUST be prefixed with <spanx style="verb">x-</spanx></c>
       <c><spanx style="verb">salience</spanx></c>
       <c>number</c>
       <c>MUST</c>
@@ -143,11 +148,11 @@ containing the following fields:</t>
       <c><spanx style="verb">fuzz_lo</spanx></c>
       <c>string or null</c>
       <c>MAY</c>
-      <c>fuzzy lower interval bound</c>
+      <c>lower interval bound formatted according to <xref target="RFC3339"/></c>
       <c><spanx style="verb">fuzz_hi</spanx></c>
       <c>string or null</c>
       <c>MAY</c>
-      <c>fuzzy upper interval bound</c>
+      <c>upper interval bound formatted according to <xref target="RFC3339"/></c>
       <c><spanx style="verb">provenance</spanx></c>
       <c>string</c>
       <c>SHOULD</c>
@@ -249,8 +254,11 @@ treat <spanx style="verb">latest_consolidation</spanx> as the whole truth.</t>
 <t>A dossier is the full tau-ordered list of every sighting of an object. Each
 sighting MUST include an <spanx style="verb">episode_id</spanx>, <spanx style="verb">tau</spanx>, <spanx style="verb">wall</spanx>, and <spanx style="verb">kind</spanx>; MAY include
 <spanx style="verb">subject_norm</spanx>, <spanx style="verb">body_text</spanx>, <spanx style="verb">channel</spanx>, and <spanx style="verb">confidence</spanx>. The list MUST be
-ordered by tau (ascending or descending; a consumer MUST NOT assume a
-direction without inspecting two adjacent tau values).</t>
+ordered by <spanx style="verb">tau</spanx> <strong>ascending</strong> (oldest to newest, i.e. chronological order of
+subjective time). Producers MUST NOT emit a descending or mixed order; a
+consumer MUST be able to assume ascending order without inspecting adjacent
+values. This removes any ambiguity for single-sighting dossiers or sightings
+sharing an identical <spanx style="verb">tau</spanx>.</t>
 
 <t>Normative example:</t>
 
@@ -275,8 +283,8 @@ direction without inspecting two adjacent tau values).</t>
       <c>recall hit + entity digest + dossier structure (this RFC)</c>
       <c>free, standard</c>
       <c>PEEP Level 2+</c>
-      <c>full n=500 autopsies, fresh-model fingerprints, private runs</c>
-      <c>private, per agreement</c>
+      <c>extended temporal autopsies, model fingerprinting, and dense diagnostic vectors (reserved for future specifications)</c>
+      <c>future specification</c>
 </texttable>
 
 </section>
@@ -354,6 +362,32 @@ URI scheme.</t>
   <seriesInfo name="RFC" value="2119"/>
   <seriesInfo name="DOI" value="10.17487/RFC2119"/>
 </reference>
+<reference anchor="RFC8174">
+  <front>
+    <title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
+    <author fullname="B. Leiba" initials="B." surname="Leiba"/>
+    <date month="May" year="2017"/>
+    <abstract>
+      <t>RFC 2119 specifies common key words that may be used in protocol specifications. This document aims to reduce the ambiguity by clarifying that only UPPERCASE usage of the key words have the defined special meanings.</t>
+    </abstract>
+  </front>
+  <seriesInfo name="BCP" value="14"/>
+  <seriesInfo name="RFC" value="8174"/>
+  <seriesInfo name="DOI" value="10.17487/RFC8174"/>
+</reference>
+<reference anchor="RFC3339">
+  <front>
+    <title>Date and Time on the Internet: Timestamps</title>
+    <author fullname="G. Klyne" initials="G." surname="Klyne"/>
+    <author fullname="C. Newman" initials="C." surname="Newman"/>
+    <date month="July" year="2002"/>
+    <abstract>
+      <t>This document defines a date and time format for use in Internet protocols that is a profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.</t>
+    </abstract>
+  </front>
+  <seriesInfo name="RFC" value="3339"/>
+  <seriesInfo name="DOI" value="10.17487/RFC3339"/>
+</reference>
 
 
 
@@ -382,80 +416,87 @@ URI scheme.</t>
   </back>
 
 <!-- ##markdown-source:
-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
-AqGmAX3BHgAA
+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
+TeRWyHtO4zHj4D/B5fBguSEAAA==
 
 -->
 

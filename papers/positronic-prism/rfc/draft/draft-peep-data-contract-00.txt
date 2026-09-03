@@ -1,0 +1,504 @@
+
+
+
+
+Network Working Group                                            S. Wong
+Internet-Draft                                                  Positron
+Intended status: Informational                          2 September 2026
+Expires: 6 March 2027
+
+
+       Positronic Engram Exchange Protocol: Level 1 Data Contract
+                      draft-peep-data-contract-00
+
+Abstract
+
+   PEEP (Positronic Engram Exchange Protocol) defines the structure of
+   the polytemporal data a memory engine delivers to a reasoning agent.
+   This document specifies Level 1: the per-hit record, the entity
+   digest, and the tau-ordered dossier.  A system that produces payloads
+   conforming to the requirements in Section 3 is PEEP-compliant;
+   compliance is machine-checkable from the payload alone (see
+   Section 5).
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 6 March 2027.
+
+Copyright Notice
+
+   Copyright (c) 2026 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.
+
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 1]
+
+Internet-Draft                    PEEP                    September 2026
+
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   3
+   3.  Normative Requirements  . . . . . . . . . . . . . . . . . . .   3
+     3.1.  Per-hit record (a recall hit) . . . . . . . . . . . . . .   3
+     3.2.  Entity digest (the "peep")  . . . . . . . . . . . . . . .   5
+     3.3.  Dossier (dig-deeper)  . . . . . . . . . . . . . . . . . .   7
+     3.4.  Level semantics . . . . . . . . . . . . . . . . . . . . .   7
+   4.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
+   5.  Conformance . . . . . . . . . . . . . . . . . . . . . . . . .   8
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   8
+   7.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   8
+   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   8
+     8.1.  Normative References  . . . . . . . . . . . . . . . . . .   8
+     8.2.  Informative References  . . . . . . . . . . . . . . . . .   8
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   9
+
+1.  Introduction
+
+   A memory system that stores every byte is a database, not a memory.
+   PEEP is the interface of a polytemporal memory system: the structure
+   it hands to an agent so the agent can decide retrieval depth without
+   coupling to the engine that produced the data.  Adopt PEEP, and any
+   agent can consume polytemporal memory from any producer.
+
+   The contract is built on four design principles:
+
+   1.  *Polytemporal by construction* - every record carries its time
+       vector, so time is never a decoration; it is the structure.
+
+   2.  *Agent-decision-friendly* - the contract presents the entity's
+       temporal family and lets the agent decide depth.  It does not
+       pre-judge.
+
+   3.  *Self-describing* - each record is complete enough to interpret
+       without the engine: tau, wall, provenance, salience travel with
+       the data.
+
+   4.  *Retrieval-isolated* - gold-presence is verifiable from the
+       payload alone.
+
+
+
+
+
+
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 2]
+
+Internet-Draft                    PEEP                    September 2026
+
+
+2.  Terminology
+
+     +============+=================================================+
+     | term       | meaning                                         |
+     +============+=================================================+
+     | *producer* | a memory engine that emits PEEP payloads        |
+     +------------+-------------------------------------------------+
+     | *consumer* | an agent or service that receives PEEP payloads |
+     +------------+-------------------------------------------------+
+     | *episode*  | one encoded memory event (a message, snapshot,  |
+     |            | or consolidation)                               |
+     +------------+-------------------------------------------------+
+     | *object*   | a family of tau-stamped sightings of one        |
+     |            | canonical entity                                |
+     +------------+-------------------------------------------------+
+     | *tau*      | subjective time: integrated novelty/prediction- |
+     |            | error density, agent-native (not wall-clock)    |
+     +------------+-------------------------------------------------+
+     | *wall*     | wall-clock timestamp of the episode             |
+     +------------+-------------------------------------------------+
+     | *dossier*  | the full tau-ordered list of an object's        |
+     |            | sightings                                       |
+     +------------+-------------------------------------------------+
+     | *digest*   | the compact "peep" summary of an object's depth |
+     +------------+-------------------------------------------------+
+
+                                 Table 1
+
+3.  Normative Requirements
+
+3.1.  Per-hit record (a recall hit)
+
+   A recall operation returns zero or more hits.  Each hit MUST be a
+   JSON object containing the following fields:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 3]
+
+Internet-Draft                    PEEP                    September 2026
+
+
+    +==============+=========+=============+==========================+
+    | field        | type    | requirement | meaning                  |
+    +==============+=========+=============+==========================+
+    | episode_id   | string  | MUST        | stable unique identifier |
+    |              |         |             | of the episode           |
+    +--------------+---------+-------------+--------------------------+
+    | tau          | number  | MUST        | subjective time          |
+    |              |         |             | coordinate; MUST NOT be  |
+    |              |         |             | null                     |
+    +--------------+---------+-------------+--------------------------+
+    | wall         | string  | MUST        | ISO-8601 wall-clock      |
+    |              |         |             | timestamp; MUST be a     |
+    |              |         |             | string                   |
+    +--------------+---------+-------------+--------------------------+
+    | stream       | string  | SHOULD      | the source stream        |
+    |              |         |             | identifier               |
+    +--------------+---------+-------------+--------------------------+
+    | kind         | string  | MUST        | one of message,          |
+    |              |         |             | consolidation            |
+    |              |         |             | (extensible)             |
+    +--------------+---------+-------------+--------------------------+
+    | salience     | number  | MUST        | encoding salience in     |
+    |              |         |             | [0,1]                    |
+    +--------------+---------+-------------+--------------------------+
+    | snippet      | string  | SHOULD      | the retrieved text       |
+    +--------------+---------+-------------+--------------------------+
+    | fuzz_lo      | string  | MAY         | fuzzy lower interval     |
+    |              | or null |             | bound                    |
+    +--------------+---------+-------------+--------------------------+
+    | fuzz_hi      | string  | MAY         | fuzzy upper interval     |
+    |              | or null |             | bound                    |
+    +--------------+---------+-------------+--------------------------+
+    | provenance   | string  | SHOULD      | one of witnessed,        |
+    |              |         |             | reconstructed            |
+    +--------------+---------+-------------+--------------------------+
+    | person_boost | number  | MAY         | person-weighting applied |
+    |              |         |             | at retrieval             |
+    +--------------+---------+-------------+--------------------------+
+    | fallback     | boolean | MUST        | true if the hit came     |
+    |              |         |             | from the fallback        |
+    |              |         |             | channel                  |
+    +--------------+---------+-------------+--------------------------+
+
+                                  Table 2
+
+   Normative example:
+
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 4]
+
+Internet-Draft                    PEEP                    September 2026
+
+
+   {
+     "episode_id": "9f1c8b2a-0000-4000-8000-000000000000",
+     "tau": 1935.4,
+     "wall": "2026-09-01T04:11:32+00:00",
+     "stream": "chat:1",
+     "kind": "message",
+     "salience": 0.5,
+     "snippet": "...retrieved text...",
+     "fuzz_lo": null,
+     "fuzz_hi": null,
+     "provenance": "witnessed",
+     "person_boost": 1.0,
+     "fallback": false
+   }
+
+3.2.  Entity digest (the "peep")
+
+   When a cue fuzzy-matches an object, the recall response MAY include
+   an object block.  When present, it MUST be a compact summary - a peep
+   - not a full dump.  It MUST contain a versions object with these
+   fields:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 5]
+
+Internet-Draft                    PEEP                    September 2026
+
+
+   +=============================+=============+===========+=============+
+   |field                        |type         |requirement|meaning      |
+   +=============================+=============+===========+=============+
+   |canonical_name               |string       |MUST       |normalized   |
+   |                             |             |           |entity name  |
+   +-----------------------------+-------------+-----------+-------------+
+   |kind                         |string       |SHOULD     |entity       |
+   |                             |             |           |(extensible) |
+   +-----------------------------+-------------+-----------+-------------+
+   |status                       |string       |SHOULD     |one of       |
+   |                             |             |           |active,      |
+   |                             |             |           |forming,     |
+   |                             |             |           |dormant,     |
+   |                             |             |           |forgotten    |
+   +-----------------------------+-------------+-----------+-------------+
+   |versions.sighting_count      |integer      |MUST       |number of    |
+   |                             |             |           |sightings    |
+   +-----------------------------+-------------+-----------+-------------+
+   |versions.tau_span            |array[number]|MUST       |[min_tau,    |
+   |                             |             |           |max_tau] of  |
+   |                             |             |           |the family   |
+   +-----------------------------+-------------+-----------+-------------+
+   |versions.latest_consolidation|string       |MUST       |distilled    |
+   |                             |             |           |summary of   |
+   |                             |             |           |the latest   |
+   |                             |             |           |consolidation|
+   +-----------------------------+-------------+-----------+-------------+
+   |versions.oldest_tau          |number       |MUST       |oldest       |
+   |                             |             |           |sighting's   |
+   |                             |             |           |tau          |
+   +-----------------------------+-------------+-----------+-------------+
+
+                                  Table 3
+
+   Normative example:
+
+   {
+     "canonical_name": "positronic-opencode-plugin",
+     "kind": "entity",
+     "status": "active",
+     "versions": {
+       "sighting_count": 106,
+       "tau_span": [16.2, 2368.3],
+       "latest_consolidation": "...distilled summary...",
+       "oldest_tau": 16.2
+     }
+   }
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 6]
+
+Internet-Draft                    PEEP                    September 2026
+
+
+   The digest MUST be a glimpse, not the data: a consumer reads it to
+   learn that polytemporal depth exists, then decides whether to dig
+   (dossier).  It MUST NOT treat latest_consolidation as the whole
+   truth.
+
+3.3.  Dossier (dig-deeper)
+
+   A dossier is the full tau-ordered list of every sighting of an
+   object.  Each sighting MUST include an episode_id, tau, wall, and
+   kind; MAY include subject_norm, body_text, channel, and confidence.
+   The list MUST be ordered by tau (ascending or descending; a consumer
+   MUST NOT assume a direction without inspecting two adjacent tau
+   values).
+
+   Normative example:
+
+   [
+     {"episode_id": "...", "tau": 16.2, "wall": "2026-08-25T09:00:00+00:00",
+      "kind": "message", "subject_norm": "...", "body_text": "...",
+      "channel": "text", "confidence": 0.9},
+     {"episode_id": "...", "tau": 2368.3, "wall": "2026-09-01T04:11:32+00:00",
+      "kind": "consolidation", "confidence": 0.9}
+   ]
+
+3.4.  Level semantics
+
+    +==============+==================================+==============+
+    | Level        | content                          | access       |
+    +==============+==================================+==============+
+    | PEEP Level 1 | recall hit + entity digest +     | free,        |
+    |              | dossier structure (this RFC)     | standard     |
+    +--------------+----------------------------------+--------------+
+    | PEEP Level   | full n=500 autopsies, fresh-     | private, per |
+    | 2+           | model fingerprints, private runs | agreement    |
+    +--------------+----------------------------------+--------------+
+
+                                 Table 4
+
+4.  Security Considerations
+
+   *  Payloads are data, not code.  Consumers MUST NOT evaluate any
+      field as an expression or query language.
+
+   *  snippet, body_text, and latest_consolidation may contain arbitrary
+      user text.  Consumers MUST treat them as untrusted data
+      (rendering, logging, or echoing verbatim can leak PII).
+
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 7]
+
+Internet-Draft                    PEEP                    September 2026
+
+
+   *  Producers MAY redact or omit body_text for privacy tiers; the
+      contract is satisfied by the mandatory fields only.
+
+5.  Conformance
+
+   A system is PEEP-compliant if every payload it produces satisfies the
+   per-hit record, entity digest (when an object block is present), and
+   dossier (when requested) requirements above.  Compliance is machine-
+   checkable from the payload alone.
+
+   The executable conformance suite lives in the positronic-peep project
+   (test_peep_conformance.py, 5 tests).  A producer is compliant iff
+   every test passes against its payload.  The tests assert,
+   normatively:
+
+   1.  every recall hit carries episode_id, non-null tau, string wall;
+
+   2.  every hit carries salience, kind in {message, consolidation},
+       boolean fallback;
+
+   3.  the digest exposes versions with sighting_count, 2-element
+       tau_span, latest_consolidation, oldest_tau;
+
+   4.  the dossier is tau-ordered and every sighting has episode_id +
+       kind;
+
+   5.  the digest is a peep - compact, not a full dump.
+
+6.  IANA Considerations
+
+   This document has no IANA actions.  The companion transport
+   specification (PEEP-0002) requests the peep service name, TCP port
+   2114, and the peep URI scheme.
+
+7.  Acknowledgements
+
+   The PEEP protocol series is developed in the positron project.
+
+8.  References
+
+8.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
+
+8.2.  Informative References
+
+
+
+Wong                      Expires 6 March 2027                  [Page 8]
+
+Internet-Draft                    PEEP                    September 2026
+
+
+   [PEEP-0002]
+              Wong, S., "Positronic Engram Exchange Protocol: HTTP
+              Transport", PEEP 2, 2 September 2026.
+
+Author's Address
+
+   Shing Wong
+   Positron
+   Email: swong@stuartconsultinggroup.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 9]

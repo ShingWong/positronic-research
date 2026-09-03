@@ -1,0 +1,504 @@
+
+
+
+
+Network Working Group                                            S. Wong
+Internet-Draft                                                  Positron
+Intended status: Informational                          2 September 2026
+Expires: 6 March 2027
+
+
+          Positronic Engram Exchange Protocol: HTTP Transport
+                      draft-peep-http-transport-00
+
+Abstract
+
+   This document specifies the HTTP transport for PEEP-0001 payloads:
+   how a polytemporal memory service exposes its brains to clients, and
+   how federated recall fans out across peer hosts.  It defines the
+   endpoints, request/response shapes, authentication model, and
+   federation semantics.  A server that conforms to this specification
+   is PEEP-HTTP-compliant; compliance is verified by the executable
+   conformance gate.
+
+   This document requests the registration of the "peep" service name
+   and TCP port 2114 in the IANA Service Name and Transport Protocol
+   Port Number Registry, and the "peep" URI scheme in the IANA URI
+   Schemes registry.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 6 March 2027.
+
+Copyright Notice
+
+   Copyright (c) 2026 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 1]
+
+Internet-Draft                  PEEP-HTTP                 September 2026
+
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   3
+   3.  Base Protocol . . . . . . . . . . . . . . . . . . . . . . . .   3
+     3.1.  Transport . . . . . . . . . . . . . . . . . . . . . . . .   3
+     3.2.  Endpoints . . . . . . . . . . . . . . . . . . . . . . . .   3
+     3.3.  Request/response shapes . . . . . . . . . . . . . . . . .   4
+   4.  Authentication  . . . . . . . . . . . . . . . . . . . . . . .   5
+     4.1.  Model . . . . . . . . . . . . . . . . . . . . . . . . . .   5
+     4.2.  Local (development) . . . . . . . . . . . . . . . . . . .   5
+     4.3.  Single shared key . . . . . . . . . . . . . . . . . . . .   5
+     4.4.  Extension . . . . . . . . . . . . . . . . . . . . . . . .   6
+   5.  Federation  . . . . . . . . . . . . . . . . . . . . . . . . .   6
+     5.1.  Peer registration . . . . . . . . . . . . . . . . . . . .   6
+     5.2.  Fan-out semantics . . . . . . . . . . . . . . . . . . . .   6
+     5.3.  Resilience  . . . . . . . . . . . . . . . . . . . . . . .   6
+     5.4.  Recursion guard . . . . . . . . . . . . . . . . . . . . .   6
+     5.5.  Timeout . . . . . . . . . . . . . . . . . . . . . . . . .   6
+   6.  Conformance . . . . . . . . . . . . . . . . . . . . . . . . .   7
+   7.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
+   8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   7
+     8.1.  Service Name and Transport Protocol Port Number
+           Registry  . . . . . . . . . . . . . . . . . . . . . . . .   7
+     8.2.  URI Scheme  . . . . . . . . . . . . . . . . . . . . . . .   8
+     8.3.  Expert Review . . . . . . . . . . . . . . . . . . . . . .   8
+     8.4.  Security  . . . . . . . . . . . . . . . . . . . . . . . .   9
+   9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   9
+   10. References  . . . . . . . . . . . . . . . . . . . . . . . . .   9
+     10.1.  Normative References . . . . . . . . . . . . . . . . . .   9
+     10.2.  Informative References . . . . . . . . . . . . . . . . .   9
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   9
+
+1.  Introduction
+
+   PEEP-0001 [PEEP-0001] defines _what_ a polytemporal payload is.  This
+   document defines _how to move it_: a stateless HTTP service that
+   exposes a brain's memory operations, and a one-hop federation model
+   that lets recall span many hosts.  The reference implementation is
+   positronic-serve (port 2114).
+
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 2]
+
+Internet-Draft                  PEEP-HTTP                 September 2026
+
+
+   The transport is *thin and stateless*: every memory verb delegates to
+   a producer's memory ops, the server holds no conversation, and
+   federation is a bounded fan-out with reciprocal-rank fusion (RRF).
+   There is no stateful session and no connection-oriented semantics
+   beyond HTTP itself.
+
+2.  Terminology
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in [RFC2119].  All PEEP
+   payload shapes are defined in [PEEP-0001].
+
+3.  Base Protocol
+
+3.1.  Transport
+
+   *  HTTP/1.1 or HTTP/2.0.  Request and response bodies MUST be UTF-8
+      JSON (application/json).
+
+   *  The default well-known port is *2114*. Servers MAY bind other
+      ports; clients MUST discover the port from the base URL.
+
+   *  All /v1/memory/* endpoints are POST and carry a JSON body.
+      Liveness and read-only discovery endpoints (/healthz,
+      /v1/federation/peers) are GET.
+
+3.2.  Endpoints
+
+     +========+==================+========+==========================+
+     | method | path             | public | description              |
+     +========+==================+========+==========================+
+     | GET    | /healthz         | yes    | liveness: {ok: bool,     |
+     |        |                  |        | brain: str, peers: int}  |
+     +--------+------------------+--------+--------------------------+
+     | POST   | /v1/memory/      | no     | PEEP-0001 recall hits (+ |
+     |        | recall           |        | optional object digest)  |
+     +--------+------------------+--------+--------------------------+
+     | POST   | /v1/memory/ask   | no     | PEEP-0001 dossier for a  |
+     |        |                  |        | named object             |
+     +--------+------------------+--------+--------------------------+
+     | POST   | /v1/memory/      | no     | write a consolidation    |
+     |        | consolidate      |        | summary event            |
+     +--------+------------------+--------+--------------------------+
+     | POST   | /v1/memory/prune | no     | run tau-decay pruning on |
+     |        |                  |        | the live brain           |
+     +--------+------------------+--------+--------------------------+
+     | POST   | /v1/memory/      | no     | ingest a new memory      |
+
+
+
+Wong                      Expires 6 March 2027                  [Page 3]
+
+Internet-Draft                  PEEP-HTTP                 September 2026
+
+
+     |        | ingest           |        | episode                  |
+     +--------+------------------+--------+--------------------------+
+     | POST   | /v1/memory/      | no     | local + peer recall,     |
+     |        | federated_recall |        | RRF-fused                |
+     +--------+------------------+--------+--------------------------+
+     | GET    | /v1/federation/  | yes    | configured peer list     |
+     |        | peers            |        |                          |
+     +--------+------------------+--------+--------------------------+
+
+                                  Table 1
+
+3.3.  Request/response shapes
+
+   POST /v1/memory/recall:
+
+   Request:
+
+   {"text": "what did we decide about the paper", "k": 8,
+    "consolidation": null, "context_window": 0}
+
+   Response — a PEEP-0001 recall payload:
+
+   {"results": [ {"episode_id": "...", "tau": 1935.4, "wall": "...",
+                  "kind": "message", "salience": 0.5, "fallback": false} ],
+    "object": {"canonical_name": "...", "versions": {...}}}
+
+   *  text REQUIRED; k OPTIONAL (default 8); consolidation OPTIONAL
+      (null | "only" | "first"); context_window OPTIONAL (integer >= 0).
+
+   *  The object block is OPTIONAL and present only when the cue fuzzy-
+      matches.
+
+   POST /v1/memory/ask:
+
+   Request: {"object": "auth-system"}
+
+   Response:
+
+   {"sightings": [ {"episode_id": "...", "tau": 16.2, "wall": "...",
+                    "kind": "message"} ]}
+
+   POST /v1/memory/consolidate:
+
+   Request: {"text": "summary...", "brain": "kairos", "arousal": 0.4}
+
+   Response: {"ok": true, "tau": 1935.4, "encoded": true, "episode_id":
+   "..."}
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 4]
+
+Internet-Draft                  PEEP-HTTP                 September 2026
+
+
+   POST /v1/memory/prune:
+
+   Request: {}
+
+   Response: a prune report — {"scanned": n, "day_merged": n,
+   "week_merged": n, "expired": n, "residues": n}.
+
+   POST /v1/memory/ingest:
+
+   Request: {"text": "a new memory", "brain": "kairos", "arousal": 0.5}
+
+   Response: {"tau": n, "encoded": bool, "episode_id": "..."}
+
+   POST /v1/memory/federated_recall:
+
+   Request: {"text": "...", "k": 8}
+
+   Response — PEEP-0001 hits, each tagged with source_host, plus
+   sources:
+
+   {"results": [ {"episode_id": "...", "tau": n, "source_host": "local"} ],
+    "sources": ["local", "http://10.0.0.5:2114"]}
+
+4.  Authentication
+
+4.1.  Model
+
+   The transport defines an authentication *seam*, not a single scheme.
+   A server MAY use any scheme that satisfies a minimal KeyManager
+   contract: validate a token against a scope.  Two schemes are
+   specified normatively.
+
+4.2.  Local (development)
+
+   *local*: no token required.  A server using this scheme MUST NOT bind
+   non-loopback interfaces; it is for development only.
+
+4.3.  Single shared key
+
+   *single*: one bearer token.  A client MUST send Authorization: Bearer
+   <key> on every /v1/memory/* request.
+
+   *  A missing or wrong token MUST produce 401 Unauthorized.
+
+   *  A correct token MUST produce the normal response.
+
+
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 5]
+
+Internet-Draft                  PEEP-HTTP                 September 2026
+
+
+4.4.  Extension
+
+   Other schemes (Google, Azure, AWS, OAuth, and so on) MAY be
+   implemented behind the KeyManager contract.  The server MUST only
+   call validate(token, scope); it MUST NOT couple to a scheme's
+   internals.
+
+5.  Federation
+
+5.1.  Peer registration
+
+   A server's configured peers are a list of base URLs, registered out-
+   of-band (config), not self-advertised.
+
+5.2.  Fan-out semantics
+
+   federated_recall MUST:
+
+   1.  run local recall on the configured brain;
+
+   2.  fan out to each peer's /v1/memory/recall (single hop), forwarding
+       the server's own Authorization token when the scheme is single;
+
+   3.  RRF-fuse the hit lists, dedup by episode_id;
+
+   4.  tag each hit with its source_host;
+
+   5.  return {results, sources}.
+
+5.3.  Resilience
+
+   A peer that is unreachable, times out, or returns an error MUST be
+   skipped — recall MUST NOT fail because one peer is down.  The
+   response degrades to the healthy subset.
+
+5.4.  Recursion guard
+
+   Peers MUST be queried at their plain /v1/memory/recall (single hop).
+   A server MUST NOT recurse into a peer's /v1/memory/federated_recall.
+
+5.5.  Timeout
+
+   The default per-peer timeout SHOULD be 3 seconds.  A server MAY make
+   this configurable.
+
+
+
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 6]
+
+Internet-Draft                  PEEP-HTTP                 September 2026
+
+
+6.  Conformance
+
+   A server is PEEP-HTTP-compliant iff it satisfies the base protocol,
+   authentication, and federation requirements above.  The executable
+   conformance gate (validate-protocol.sh) seeds a temporary brain,
+   boots the server, and checks endpoints, payload shape, the auth
+   matrix, and live two-server federation.  The gate exits 0 iff every
+   check passes.
+
+7.  Security Considerations
+
+   *  The transport carries PEEP-0001 payloads, which may contain
+      arbitrary user text.  Servers MUST treat memory content as
+      untrusted and MUST NOT evaluate it.
+
+   *  A single-key server MUST require TLS when not bound to loopback.
+
+   *  Federation forwards the server's own token to peers.  A server
+      SHOULD only register peers it trusts with that token.
+
+   *  /v1/memory/ingest and /v1/memory/consolidate write to the brain;
+      they MUST be auth-guarded like reads.
+
+8.  IANA Considerations
+
+   This document requests *three* registrations.  All three were
+   verified unassigned against the IANA registries at the time of
+   writing (2026-09-02).
+
+8.1.  Service Name and Transport Protocol Port Number Registry
+
+   IANA is requested to register the following service name and port per
+   [RFC6335]:
+
+      +=========+===========+======+===================+===========+
+      | Service | Transport | Port | Description       | Reference |
+      | Name    | Protocol  |      |                   |           |
+      +=========+===========+======+===================+===========+
+      | peep    | TCP       | 2114 | Positronic Engram | this      |
+      |         |           |      | Exchange Protocol | document  |
+      |         |           |      | (HTTP transport)  |           |
+      +---------+-----------+------+-------------------+-----------+
+
+                                 Table 2
+
+   *  *Service name:* peep — length 4, valid per the RFC 6335 service-
+      name syntax.
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 7]
+
+Internet-Draft                  PEEP-HTTP                 September 2026
+
+
+   *  *Port:* 2114 — in the Registered range (1024-49151); verified
+      unassigned.
+
+   *  *Description:* the PEEP-HTTP transport for polytemporal memory
+      (brain-as-a-service + federation).
+
+   *  *Note (NDR-2114):* the port number doubles as a mnemonic — "2" for
+      bi (Bicentennial Man, model NDR-114).  The assignee is the PEEP
+      protocol project (Shing Wong).
+
+8.2.  URI Scheme
+
+   IANA is requested to register the following URI scheme in the
+   "Uniform Resource Identifier (URI) Schemes" registry per [RFC7595]:
+
+       +========+=====================================+===========+
+       | Scheme | Description                         | Reference |
+       +========+=====================================+===========+
+       | peep   | Positronic Engram Exchange Protocol | this      |
+       |        | - locate a PEEP-HTTP memory service | document  |
+       |        | or a PEEP data object               |           |
+       +--------+-------------------------------------+-----------+
+
+                                 Table 3
+
+   *  *Syntax:* peep://<host>[:<port>]/v1/memory/<operation> for the
+      service; peep: followed by a PEEP-0001 object reference for data
+      addressing.
+
+   *  *Character encoding:* ASCII (as used in HTTP URLs).
+
+   *  *Intended usage:* locates a PEEP-compliant memory service, for use
+      by agents and client libraries.
+
+   *  *Applications using the scheme:* PEEP-compliant agents, the
+      positronic-serve reference implementation, and federated memory
+      peers.
+
+8.3.  Expert Review
+
+   Per [RFC6335] and [RFC7595], registration requests are subject to
+   Expert Review.  The designated expert verifies: (a) no collision with
+   existing registrations, (b) the service name meets the syntax rules,
+   and (c) the scheme is used in a manner consistent with its
+   specification.
+
+
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 8]
+
+Internet-Draft                  PEEP-HTTP                 September 2026
+
+
+8.4.  Security
+
+   The port and scheme registrations carry no security considerations
+   beyond those above: a peep:// service MUST use TLS when not bound to
+   loopback, and the scheme MUST NOT be used to signal trust in the
+   payload content.
+
+9.  Acknowledgements
+
+   The PEEP protocol series is developed in the positron project.
+
+10.  References
+
+10.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC6335]  Cotton, M., Eggert, L., Touch, J., Westerlund, M., and S.
+              Cheshire, "Internet Assigned Numbers Authority (IANA)
+              Procedures for the Management of the Service Name and
+              Transport Protocol Port Number Registry", BCP 165,
+              RFC 6335, DOI 10.17487/RFC6335, August 2011,
+              <https://www.rfc-editor.org/rfc/rfc6335>.
+
+   [RFC7595]  Thaler, D., Ed., Hansen, T., and T. Hardie, "Guidelines
+              and Registration Procedures for URI Schemes", BCP 35,
+              RFC 7595, DOI 10.17487/RFC7595, June 2015,
+              <https://www.rfc-editor.org/rfc/rfc7595>.
+
+10.2.  Informative References
+
+   [PEEP-0001]
+              Wong, S., "Positronic Engram Exchange Protocol: Level 1
+              Data Contract", PEEP 1, 2 September 2026.
+
+Author's Address
+
+   Shing Wong
+   Positron
+   Email: swong@stuartconsultinggroup.com
+
+
+
+
+
+
+
+
+Wong                      Expires 6 March 2027                  [Page 9]
